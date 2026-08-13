@@ -5,8 +5,8 @@ import "./styles.css";
 
 export const metadata: Metadata = {
   description:
-    "Organize contas, tarefas, consumo e auditoria no X com controle.",
-  title: "NexoFlux | Automação com controle",
+    "Simulação navegável de workspaces, membros e permissões da NexoFlux.",
+  title: "NexoFlux | Operação simulada",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

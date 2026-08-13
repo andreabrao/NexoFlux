@@ -17,6 +17,14 @@ flowchart LR
 
 A API é a fronteira de identidade e autorização. O PostgreSQL mantém identidade, sessões, workspaces, memberships e auditoria. O Redis permanece reservado para filas e coordenação assíncrona; ele não participa da autenticação deste marco.
 
+## Modo de simulação web
+
+Enquanto a infraestrutura local não estiver disponível, a aplicação web oferece
+um modo demonstrativo autônomo. O repositório de demonstração vive no cliente,
+tem seed versionado no código e grava as alterações em \`localStorage\`; a sessão
+da aba usa \`sessionStorage\`. Esse modo reproduz as regras de RBAC para
+apresentação, mas não substitui a autorização da API em uma implantação real.
+
 ## Componentes
 
 ### packages/contracts

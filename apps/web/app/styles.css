@@ -1,10 +1,18 @@
 :root {
-  --amber: #e7a928;
-  --blue: #3169c6;
-  --green: #2f624e;
-  --ink: #17251f;
-  --mist: #f3f7f5;
-  --muted: #607068;
+  --amber: #f4b740;
+  --blue: #2e67c7;
+  --blue-dark: #214f9e;
+  --cloud: #f4f7f5;
+  --green: #3d8064;
+  --green-soft: #dcf1e6;
+  --ink: #142720;
+  --ink-soft: #263f36;
+  --line: #dbe4df;
+  --muted: #61736a;
+  --paper: #ffffff;
+  --red: #b94c4c;
+  --red-soft: #fdf0ef;
+  --shadow: 0 22px 60px rgb(19 41 32 / 10%);
   color-scheme: light;
   font-family:
     Inter,
@@ -20,12 +28,8 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
-  background: #ffffff;
+  background: var(--cloud);
   color: var(--ink);
   margin: 0;
 }
@@ -35,9 +39,85 @@ a {
   text-decoration: none;
 }
 
-main {
-  min-height: 100vh;
-  overflow: hidden;
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.eyebrow,
+.sectionLabel {
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.brand {
+  align-items: center;
+  display: inline-flex;
+  font-size: 1.25rem;
+  font-weight: 800;
+  gap: 0.65rem;
+  letter-spacing: -0.04em;
+}
+
+.brandMark,
+.loadingMark {
+  align-items: center;
+  background: linear-gradient(135deg, var(--blue), var(--green));
+  border-radius: 0.7rem;
+  color: white;
+  display: inline-flex;
+  font-size: 1.05rem;
+  font-weight: 850;
+  height: 2.35rem;
+  justify-content: center;
+  letter-spacing: 0;
+  width: 2.35rem;
+}
+
+.primaryButton,
+.secondaryLink,
+.navLink {
+  align-items: center;
+  border: 0;
+  border-radius: 0.65rem;
+  display: inline-flex;
+  font-weight: 760;
+  justify-content: center;
+  min-height: 2.85rem;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.primaryButton {
+  background: var(--blue);
+  color: white;
+  padding: 0.78rem 1.15rem;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--blue-dark);
+  transform: translateY(-1px);
 }
 
 .navigation {
@@ -45,137 +125,238 @@ main {
   display: flex;
   justify-content: space-between;
   margin: 0 auto;
-  max-width: 1200px;
-  padding: 28px 32px;
+  max-width: 75rem;
+  padding: 1.6rem 2rem;
 }
 
-.brand {
+.navActions {
   align-items: center;
-  display: inline-flex;
-  font-size: 21px;
-  font-weight: 760;
-  gap: 10px;
-  letter-spacing: -0.04em;
-}
-
-.brandMark {
-  align-items: center;
-  background: linear-gradient(135deg, var(--blue), var(--green));
-  border-radius: 12px;
-  color: white;
-  display: inline-flex;
-  height: 38px;
-  justify-content: center;
-  letter-spacing: 0;
-  width: 38px;
+  display: flex;
+  gap: 1rem;
 }
 
 .environment {
-  border: 1px solid #dbe6e0;
-  border-radius: 999px;
+  border: 1px solid var(--line);
+  border-radius: 99rem;
   color: var(--muted);
-  font-size: 13px;
-  padding: 8px 13px;
+  font-size: 0.78rem;
+  font-weight: 680;
+  padding: 0.45rem 0.75rem;
+}
+
+.navLink {
+  border: 1px solid var(--line);
+  padding: 0.55rem 0.85rem;
+}
+
+.navLink:hover {
+  background: white;
+  border-color: #b8cac1;
+}
+
+.landingPage {
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 .hero {
+  align-items: center;
+  display: grid;
+  gap: 4rem;
+  grid-template-columns: minmax(0, 1.12fr) minmax(19rem, 0.88fr);
   margin: 0 auto;
-  max-width: 1200px;
-  padding: 110px 32px 130px;
+  max-width: 75rem;
+  padding: 6.5rem 2rem 7.5rem;
+}
+
+.heroContent {
   position: relative;
 }
 
-.hero::after {
-  background: radial-gradient(circle, rgb(49 105 198 / 18%), transparent 66%);
-  border-radius: 50%;
+.heroContent::before {
+  background: radial-gradient(circle, rgb(244 183 64 / 31%), transparent 68%);
   content: "";
-  height: 620px;
+  height: 34rem;
+  left: -20rem;
   position: absolute;
-  right: -250px;
-  top: -70px;
-  width: 620px;
+  top: -15rem;
+  width: 34rem;
   z-index: -1;
 }
 
-.eyebrow {
-  color: var(--green);
-  font-size: 13px;
-  font-weight: 750;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+.hero h1,
+.authIntro h1,
+.accessRequired h1,
+.workspaceHeader h1 {
+  letter-spacing: -0.06em;
+  margin: 1.15rem 0 1.4rem;
 }
 
-h1,
-h2,
-p {
-  margin-top: 0;
-}
-
-h1 {
-  font-size: clamp(48px, 7vw, 88px);
-  letter-spacing: -0.065em;
+.hero h1 {
+  font-size: clamp(3.3rem, 6.3vw, 5.85rem);
   line-height: 0.96;
-  margin-bottom: 32px;
-  margin-top: 22px;
-  max-width: 920px;
+  max-width: 48rem;
 }
 
-.hero p {
+.heroContent > p:not(.eyebrow) {
   color: var(--muted);
-  font-size: clamp(18px, 2.1vw, 25px);
-  line-height: 1.55;
-  max-width: 740px;
+  font-size: clamp(1.08rem, 1.8vw, 1.35rem);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 39rem;
 }
 
 .actions {
   align-items: center;
-  color: var(--muted);
   display: flex;
   flex-wrap: wrap;
-  font-size: 14px;
-  gap: 22px;
-  margin-top: 42px;
+  gap: 1.25rem;
+  margin-top: 2.25rem;
 }
 
-.primaryAction {
-  background: var(--blue);
-  border-radius: 10px;
+.secondaryLink {
+  color: var(--ink);
+  gap: 0.5rem;
+  padding: 0.7rem 0.2rem;
+}
+
+.secondaryLink span {
+  color: var(--blue);
+  font-size: 1.2rem;
+}
+
+.secondaryLink:hover {
+  color: var(--blue-dark);
+}
+
+.heroPreview {
+  background: var(--ink);
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow);
   color: white;
-  font-weight: 720;
-  padding: 15px 20px;
+  overflow: hidden;
+  transform: rotate(2deg);
 }
 
-.primaryAction:hover {
-  background: #275bad;
+.previewBar {
+  align-items: center;
+  background: rgb(255 255 255 / 7%);
+  display: flex;
+  font-size: 0.82rem;
+  gap: 0.65rem;
+  padding: 1rem 1.2rem;
 }
 
-.primaryAction:focus-visible,
-a:focus-visible {
-  outline: 3px solid var(--amber);
-  outline-offset: 4px;
+.previewBar > span {
+  align-items: center;
+  background: var(--amber);
+  border-radius: 0.42rem;
+  color: var(--ink);
+  display: inline-flex;
+  font-weight: 850;
+  height: 1.5rem;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.previewBar i {
+  background: #8ad7b4;
+  border-radius: 50%;
+  height: 0.55rem;
+  margin-left: auto;
+  width: 0.55rem;
+}
+
+.previewContent {
+  padding: 2.3rem 2rem 2rem;
+}
+
+.previewContent > p {
+  color: #9bc8b2;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+
+.previewContent h2 {
+  font-size: clamp(1.7rem, 3vw, 2.45rem);
+  letter-spacing: -0.055em;
+  margin: 0.65rem 0 2rem;
+}
+
+.previewPeople {
+  display: flex;
+}
+
+.previewPeople span,
+.memberIdentity > span,
+.profileSummary > span {
+  align-items: center;
+  background: #ebefed;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 0.67rem;
+  font-weight: 800;
+  height: 2.2rem;
+  justify-content: center;
+  margin-right: -0.4rem;
+  width: 2.2rem;
+}
+
+.previewPeople span:nth-child(2) {
+  background: #f5d48d;
+}
+
+.previewPeople span:nth-child(3) {
+  background: #98d0b5;
+}
+
+.previewPeople span:nth-child(4) {
+  background: #b1c6ec;
+}
+
+.previewAccess {
+  align-items: center;
+  border-top: 1px solid rgb(255 255 255 / 13%);
+  color: #b9cbc2;
+  display: flex;
+  font-size: 0.78rem;
+  justify-content: space-between;
+  margin-top: 1.8rem;
+  padding-top: 1.2rem;
+}
+
+.previewAccess strong {
+  color: var(--amber);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
 }
 
 .foundation {
   background: var(--ink);
+  border-radius: 1.5rem;
   color: white;
   display: grid;
-  gap: 80px;
-  grid-template-columns: 1fr 1fr;
-  margin: 0 auto 32px;
-  max-width: 1200px;
-  padding: 72px;
+  gap: 5rem;
+  grid-template-columns: 0.85fr 1.15fr;
+  margin: 0 auto;
+  max-width: 75rem;
+  padding: 4.7rem;
 }
 
 .foundation .eyebrow {
-  color: #93cfb6;
+  color: #98d8b9;
 }
 
-h2 {
-  font-size: clamp(34px, 4vw, 54px);
-  letter-spacing: -0.045em;
+.foundation h2 {
+  font-size: clamp(2.1rem, 4.1vw, 3.5rem);
+  letter-spacing: -0.055em;
   line-height: 1.03;
-  margin-bottom: 0;
-  margin-top: 18px;
+  margin: 1.1rem 0 0;
 }
 
 .foundation ul {
@@ -185,34 +366,956 @@ h2 {
 }
 
 .foundation li {
-  align-items: center;
-  border-bottom: 1px solid rgb(255 255 255 / 16%);
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
   display: flex;
-  font-size: 18px;
-  gap: 18px;
-  padding: 20px 0;
+  gap: 1.15rem;
+  padding: 1.2rem 0;
 }
 
-.foundation li span {
+.foundation li:first-child {
+  padding-top: 0;
+}
+
+.foundation li > span {
   color: var(--amber);
-  font-size: 12px;
-  font-weight: 760;
+  font-size: 0.75rem;
+  font-weight: 850;
+  padding-top: 0.2rem;
 }
 
-@media (max-width: 760px) {
+.foundation li strong {
+  font-size: 1.08rem;
+}
+
+.foundation li p {
+  color: #bdd0c6;
+  line-height: 1.5;
+  margin: 0.4rem 0 0;
+}
+
+.landingFootnote {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 0.86rem;
+  gap: 0.7rem;
+  margin: 0 auto;
+  max-width: 75rem;
+  padding: 2rem;
+}
+
+.landingFootnote > span {
+  color: var(--amber);
+  font-size: 1.15rem;
+}
+
+.landingFootnote p {
+  margin: 0;
+}
+
+.authPage {
+  background: var(--cloud);
+  display: grid;
+  grid-template-columns: minmax(20rem, 0.95fr) minmax(23rem, 1.05fr);
+  min-height: 100vh;
+}
+
+.authIntro {
+  background: var(--ink);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem clamp(2rem, 6vw, 6rem);
+}
+
+.authIntro .eyebrow {
+  color: #9eddbf;
+}
+
+.authIntroCopy {
+  margin: 5rem 0;
+  max-width: 38rem;
+}
+
+.authIntro h1 {
+  font-size: clamp(2.8rem, 5vw, 4.8rem);
+  line-height: 0.99;
+}
+
+.authIntroCopy > p:not(.eyebrow) {
+  color: #c4d6cd;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 32rem;
+}
+
+.demoNote {
+  align-items: flex-start;
+  border-top: 1px solid rgb(255 255 255 / 16%);
+  color: #bdd0c6;
+  display: flex;
+  font-size: 0.88rem;
+  gap: 0.7rem;
+  line-height: 1.5;
+  max-width: 27rem;
+  padding-top: 1.25rem;
+}
+
+.demoNote span {
+  color: var(--amber);
+}
+
+.demoNote p {
+  margin: 0;
+}
+
+.authPanel {
+  align-self: center;
+  margin: 0 auto;
+  max-width: 32rem;
+  padding: 4rem 2rem;
+  width: 100%;
+}
+
+.authPanelHeading h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  letter-spacing: -0.055em;
+  line-height: 1.04;
+  margin: 0.85rem 0;
+}
+
+.authPanelHeading > p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.authForm {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.authForm label,
+.inviteForm label,
+.newWorkspaceForm label {
+  color: var(--ink-soft);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 760;
+  gap: 0.5rem;
+}
+
+input,
+select {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  color: var(--ink);
+  min-height: 2.85rem;
+  outline: 0;
+  padding: 0.62rem 0.75rem;
+  transition: border-color 160ms ease;
+  width: 100%;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--blue);
+}
+
+.authForm .primaryButton {
+  margin-top: 0.25rem;
+  width: 100%;
+}
+
+.formError,
+.successMessage {
+  border-radius: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+}
+
+.formError {
+  background: var(--red-soft);
+  color: #922c2c;
+}
+
+.successMessage {
+  background: var(--green-soft);
+  color: #1e6046;
+}
+
+.demoAccounts {
+  border-top: 1px solid var(--line);
+  margin-top: 2.3rem;
+  padding-top: 1.4rem;
+}
+
+.demoAccounts p:not(.sectionLabel) {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0.35rem 0 1rem;
+}
+
+code {
+  background: #e8efeb;
+  border-radius: 0.25rem;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.25rem;
+}
+
+.demoAccountGrid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.demoAccountGrid button {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  color: var(--ink);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 720;
+  gap: 0.22rem;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.demoAccountGrid button:hover {
+  background: #f9fbfa;
+  border-color: #aac1b5;
+}
+
+.demoAccountGrid button span {
+  color: var(--green);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.authSwitch {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin: 1.6rem 0 0;
+  text-align: center;
+}
+
+.authSwitch a {
+  color: var(--blue);
+  font-weight: 750;
+}
+
+.appLoading,
+.accessRequired {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.appLoading {
+  color: var(--muted);
+  gap: 1rem;
+}
+
+.appLoading .loadingMark {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.accessRequired {
+  align-items: flex-start;
+  gap: 5rem;
+  margin: 0 auto;
+  max-width: 65rem;
+}
+
+.accessRequired > div {
+  max-width: 38rem;
+}
+
+.accessRequired h1 {
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 0.98;
+}
+
+.accessRequired > div > p:not(.eyebrow):not(.formError) {
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.accessRequired .formError {
+  margin-bottom: 1rem;
+}
+
+.appShell {
+  background: var(--cloud);
+  display: grid;
+  grid-template-columns: 17.5rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.appSidebar {
+  background: var(--ink);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1.6rem 1.1rem;
+}
+
+.workspaceNavigation {
+  margin-top: 3.7rem;
+}
+
+.sidebarLabelRow {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.55rem;
+}
+
+.appSidebar .sectionLabel {
+  color: #94cfad;
+}
+
+.sidebarLabelRow > span {
+  align-items: center;
+  background: rgb(255 255 255 / 10%);
+  border-radius: 99rem;
+  color: #bdd0c6;
+  display: inline-flex;
+  font-size: 0.7rem;
+  height: 1.3rem;
+  justify-content: center;
+  width: 1.3rem;
+}
+
+.workspaceList {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+}
+
+.workspaceOption {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  color: #d5e3dc;
+  display: grid;
+  font-size: 0.79rem;
+  gap: 0.1rem 0.6rem;
+  grid-template-columns: 1.65rem minmax(0, 1fr);
+  padding: 0.55rem;
+  text-align: left;
+}
+
+.workspaceOption:hover {
+  background: rgb(255 255 255 / 6%);
+}
+
+.workspaceOptionActive {
+  background: rgb(255 255 255 / 10%);
+  border-color: rgb(255 255 255 / 10%);
+  color: white;
+}
+
+.workspaceOption > span {
+  align-items: center;
+  background: #436fbe;
+  border-radius: 0.45rem;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  grid-row: span 2;
+  height: 1.65rem;
+  justify-content: center;
+  width: 1.65rem;
+}
+
+.workspaceOption strong,
+.workspaceOption small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspaceOption small {
+  color: #9ecab5;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.newWorkspaceForm {
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  margin: 1.6rem 0;
+  padding: 1.4rem 0.55rem 0;
+}
+
+.newWorkspaceForm label {
+  color: #bdd0c6;
+}
+
+.newWorkspaceForm > div {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.newWorkspaceForm input {
+  background: rgb(255 255 255 / 7%);
+  border-color: rgb(255 255 255 / 14%);
+  color: white;
+  font-size: 0.78rem;
+  min-width: 0;
+}
+
+.newWorkspaceForm input::placeholder {
+  color: #91a89d;
+}
+
+.newWorkspaceForm button {
+  background: var(--amber);
+  border: 0;
+  border-radius: 0.55rem;
+  color: var(--ink);
+  font-size: 1.4rem;
+  font-weight: 500;
+  min-width: 2.65rem;
+}
+
+.sidebarFooter {
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  margin-top: auto;
+  padding: 1.25rem 0.55rem 0;
+}
+
+.profileSummary {
+  align-items: center;
+  display: flex;
+  gap: 0.55rem;
+}
+
+.profileSummary > span {
+  background: #b1c6ec;
+  border-color: var(--ink);
+  margin: 0;
+}
+
+.profileSummary strong,
+.profileSummary small {
+  display: block;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileSummary strong {
+  font-size: 0.78rem;
+}
+
+.profileSummary small {
+  color: #adc2b7;
+  font-size: 0.65rem;
+  margin-top: 0.1rem;
+}
+
+.textButton {
+  background: transparent;
+  border: 0;
+  color: #b9d2c4;
+  font-size: 0.78rem;
+  font-weight: 720;
+  margin-top: 0.85rem;
+  padding: 0;
+}
+
+.textButton:hover {
+  color: white;
+}
+
+.workspaceMain {
+  margin: 0 auto;
+  max-width: 76rem;
+  padding: clamp(2rem, 4vw, 4rem);
+  width: 100%;
+}
+
+.workspaceHeader {
+  align-items: end;
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.workspaceHeader h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 0.95;
+  margin-bottom: 0.6rem;
+}
+
+.workspaceHeader > div:first-child > p:last-child {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.headerRole {
+  align-items: flex-end;
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+}
+
+.headerRole > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.roleBadge {
+  border-radius: 99rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.07em;
+  padding: 0.4rem 0.6rem;
+}
+
+.roleOWNER {
+  background: #fff0cd;
+  color: #8c5d00;
+}
+
+.roleADMIN {
+  background: #dce9ff;
+  color: #285797;
+}
+
+.roleOPERATOR {
+  background: #dff3e8;
+  color: #276a4d;
+}
+
+.roleVIEWER {
+  background: #e7ece9;
+  color: #506258;
+}
+
+.simulationBanner {
+  align-items: center;
+  background: var(--ink);
+  border-radius: 0.85rem;
+  color: white;
+  display: flex;
+  gap: 0.85rem;
+  margin-top: 2.6rem;
+  padding: 1rem 1.15rem;
+}
+
+.simulationBanner > span {
+  color: var(--amber);
+  font-size: 1.15rem;
+}
+
+.simulationBanner > div {
+  min-width: 0;
+}
+
+.simulationBanner strong {
+  display: block;
+  font-size: 0.86rem;
+}
+
+.simulationBanner p {
+  color: #bdd0c6;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  margin: 0.15rem 0 0;
+}
+
+.simulationBanner button {
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 0.5rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 720;
+  margin-left: auto;
+  padding: 0.5rem 0.65rem;
+  white-space: nowrap;
+}
+
+.simulationBanner button:hover {
+  background: rgb(255 255 255 / 10%);
+}
+
+.pageMessage {
+  margin-top: 1rem;
+}
+
+.workspaceStats {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 1.5rem 0 3.5rem;
+}
+
+.workspaceStats article {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  min-height: 9rem;
+  padding: 1.15rem;
+}
+
+.workspaceStats span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.workspaceStats strong {
+  display: block;
+  font-size: clamp(1.5rem, 2.7vw, 2.15rem);
+  letter-spacing: -0.05em;
+  margin-top: 0.7rem;
+}
+
+.workspaceStats p {
+  color: var(--muted);
+  font-size: 0.76rem;
+  margin: 0.4rem 0 0;
+}
+
+.memberArea {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.sectionHeading {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sectionHeading h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: -0.055em;
+  margin: 0.7rem 0 0.55rem;
+}
+
+.sectionHeading > div > p:last-child {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 36rem;
+}
+
+.inviteForm {
+  align-items: end;
+  background: #f7faf8;
+  border: 1px solid #e2eae5;
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: minmax(0, 1fr) 9rem auto;
+  margin: 1.8rem 0 1.1rem;
+  padding: 1rem;
+}
+
+.inviteForm .primaryButton {
+  min-height: 2.85rem;
+}
+
+.readOnlyNotice {
+  background: #f7faf8;
+  border-radius: 0.7rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 1.5rem 0 1rem;
+  padding: 0.9rem;
+}
+
+.memberTable {
+  overflow-x: auto;
+}
+
+.memberTableHeading,
+.memberRow {
+  align-items: center;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(14rem, 1.5fr) minmax(7.5rem, 0.55fr) 5rem;
+  min-width: 33rem;
+}
+
+.memberTableHeading {
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 1rem 0.3rem 0.6rem;
+  text-transform: uppercase;
+}
+
+.memberRow {
+  border-bottom: 1px solid #ebf0ed;
+  padding: 0.8rem 0.3rem;
+}
+
+.memberRow:last-child {
+  border-bottom: 0;
+}
+
+.memberIdentity {
+  align-items: center;
+  display: flex;
+  gap: 0.7rem;
+}
+
+.memberIdentity > span {
+  background: #e7ece9;
+  border: 0;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.memberIdentity strong,
+.memberIdentity small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberIdentity strong {
+  font-size: 0.86rem;
+}
+
+.memberIdentity small {
+  color: var(--muted);
+  font-size: 0.73rem;
+  margin-top: 0.14rem;
+}
+
+.memberRole select {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  min-height: 2.25rem;
+  padding: 0.4rem 1.8rem 0.4rem 0.6rem;
+  width: auto;
+}
+
+.memberActions {
+  text-align: right;
+}
+
+.memberActions > span {
+  color: #a4b1aa;
+}
+
+.dangerButton {
+  background: transparent;
+  border: 0;
+  color: var(--red);
+  font-size: 0.75rem;
+  font-weight: 760;
+  padding: 0.45rem;
+}
+
+.dangerButton:hover {
+  background: var(--red-soft);
+  border-radius: 0.4rem;
+}
+
+.visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(0.92);
+  }
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .foundation {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-bottom: 5rem;
+    padding-top: 4rem;
+  }
+
+  .heroPreview {
+    max-width: 29rem;
+    width: 100%;
+  }
+
+  .foundation {
+    border-radius: 0;
+    gap: 3rem;
+    padding: 3rem 2rem;
+  }
+
+  .authPage {
+    grid-template-columns: 1fr;
+  }
+
+  .authIntro {
+    min-height: 28rem;
+  }
+
+  .authIntroCopy {
+    margin: 3.5rem 0;
+  }
+
+  .appShell {
+    grid-template-columns: 1fr;
+  }
+
+  .appSidebar {
+    min-height: auto;
+  }
+
+  .workspaceNavigation {
+    margin-top: 2rem;
+  }
+
+  .workspaceList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .newWorkspaceForm {
+    max-width: 25rem;
+  }
+
+  .sidebarFooter {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .textButton {
+    margin: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .navigation {
+    padding: 1.25rem;
+  }
+
   .environment {
     display: none;
   }
 
   .hero {
-    padding-bottom: 90px;
-    padding-top: 70px;
+    gap: 3rem;
+    padding: 3.5rem 1.25rem 4rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.9rem, 15vw, 4.15rem);
   }
 
   .foundation {
-    gap: 40px;
+    padding: 2.7rem 1.25rem;
+  }
+
+  .landingFootnote {
+    align-items: flex-start;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .authIntro,
+  .authPanel {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .authIntro {
+    min-height: 24rem;
+  }
+
+  .authIntroCopy {
+    margin: 2.75rem 0;
+  }
+
+  .demoAccountGrid {
     grid-template-columns: 1fr;
-    margin-bottom: 0;
-    padding: 48px 32px;
+  }
+
+  .workspaceList {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceMain {
+    padding: 2rem 1.1rem;
+  }
+
+  .workspaceHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .headerRole {
+    align-items: flex-start;
+    justify-items: start;
+  }
+
+  .simulationBanner {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .simulationBanner button {
+    margin-left: 2rem;
+  }
+
+  .workspaceStats {
+    grid-template-columns: 1fr;
+    margin-bottom: 2rem;
+  }
+
+  .workspaceStats article {
+    min-height: 0;
+  }
+
+  .inviteForm {
+    grid-template-columns: 1fr;
+  }
+
+  .memberArea {
+    margin-left: -0.15rem;
+    margin-right: -0.15rem;
+    padding: 1rem;
   }
 }

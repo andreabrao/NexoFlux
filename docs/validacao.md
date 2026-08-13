@@ -9,6 +9,7 @@ Data da execução documentada: 13 de agosto de 2026.
 - RBAC: metadata de rota, membership permitida/negada, concessão de Owner, usuário inexistente, último Owner e proteção de Owner contra Admin.
 - Saúde: degradação quando uma dependência falha.
 - Worker: idempotência e limites já cobertos pela baseline anterior.
+- Simulação web: seed versionado, isolamento de dados por conta, regras de papéis, restauração do estado e sessão exclusiva do navegador.
 
 ## Comandos obrigatórios
 
@@ -27,8 +28,9 @@ pnpm build
 | Prettier                  | Aprovado; todos os arquivos aderentes                         |
 | ESLint                    | Aprovado; zero erros e zero avisos                            |
 | TypeScript                | Aprovado nos contratos, API, web e worker                     |
-| Vitest                    | Aprovado; 8 arquivos e 20 testes                              |
+| Vitest                    | Aprovado; 9 arquivos e 25 testes                              |
 | Build                     | Aprovado nos contratos, API, web e worker                     |
+| Rotas da simulação web    | Aprovadas; /, /entrar, /criar-conta e /app retornaram 200     |
 | API compilada             | Inicialização aprovada                                        |
 | GET /health/live          | 200, status ok                                                |
 | GET /workspaces sem token | 401, proteção global confirmada                               |
@@ -47,9 +49,22 @@ O ambiente de execução atual não possui Docker disponível. Portanto:
 
 Quando Docker estiver disponível, executar docker compose up -d e pnpm verify:integration. O relatório completo do verificador está em marco-02-1-validacao-integracao.md.
 
+## Simulação web sem infraestrutura
+
+O Marco 3 foi validado sem PostgreSQL, Redis ou API em execução. A área em
+/entrar, /criar-conta e /app usa o seed presente no repositório, persiste
+alterações demonstrativas em localStorage e mantém a sessão em sessionStorage.
+Foram executados testes unitários para os fluxos de cadastro, papéis, proteção
+do último Owner e restauração do estado inicial, além de smoke tests HTTP das
+rotas compiladas.
+
+O comportamento e as limitações do modo demonstrativo estão detalhados em
+[marco-03-simulacao-web.md](marco-03-simulacao-web.md).
+
 ## Riscos residuais
 
 - Falta teste de integração SQL contra a versão real do PostgreSQL.
 - Falta rate limiting nos endpoints de autenticação.
 - Falta verificação de e-mail, recuperação de senha e rotação administrativa de sessões.
-- Falta interface web autenticada.
+- A interface autenticada é uma simulação local; a integração dela com a API e
+  com persistência real permanece fora do escopo deste marco.

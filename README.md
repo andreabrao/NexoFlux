@@ -7,9 +7,12 @@ Fundação técnica do MVP fictício da NexoFlux: uma plataforma multi-tenant pa
 - Marco 01: monorepo, web pública, API de saúde, worker, PostgreSQL e Redis.
 - Marco 02: cadastro, login, sessões revogáveis, workspaces, membros, RBAC, auditoria e migrações.
 - Marco 02.1: verificador automatizado de integração persistente, aguardando infraestrutura local.
-- Próximos marcos: interface autenticada, integrações autorizadas com o X, cobrança e observabilidade de produção.
+- Marco 03: simulação web autenticada com contas locais, workspaces e RBAC sem banco de dados.
+- Próximos marcos: integração da interface com a API, integrações autorizadas com o X, cobrança e observabilidade de produção.
 
 A documentação completa está em [docs/INDEX.md](./docs/INDEX.md). Código, testes e documentação fazem parte do mesmo critério de conclusão.
+
+A demonstração publicada está em [andreabrao.github.io/NexoFlux](https://andreabrao.github.io/NexoFlux/).
 
 ## Estrutura
 
@@ -53,6 +56,8 @@ O atalho pnpm check executa toda a sequência acima, exceto formatação com esc
 
 - [Marco 02](./docs/marco-02-identidade-workspaces-rbac.md)
 - [Marco 02.1 — Validação de integração](./docs/marco-02-1-validacao-integracao.md)
+- [Marco 03 — Simulação web autenticada](./docs/marco-03-simulacao-web.md)
+- [Publicação no GitHub Pages](./docs/publicacao-github-pages.md)
 - [Arquitetura](./docs/arquitetura.md)
 - [Modelo de dados](./docs/modelo-de-dados.md)
 - [API HTTP](./docs/api-http.md)

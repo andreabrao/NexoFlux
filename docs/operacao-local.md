@@ -30,6 +30,27 @@ pnpm dev
 
 A migração deve ser executada antes de testar cadastro ou login. O executor aplica arquivos SQL em ordem lexical, dentro de transação, e registra checksum.
 
+## Simulação web sem banco de dados
+
+Para apresentar o Marco 3 não é necessário iniciar Docker, PostgreSQL, Redis ou
+a API. Execute somente a aplicação web:
+
+\`\`\`bash
+pnpm --filter @nexoflux/web dev
+\`\`\`
+
+Abra http://localhost:3000/entrar e use qualquer conta demonstrativa descrita
+em [marco-03-simulacao-web.md](marco-03-simulacao-web.md). O estado de
+demonstração fica exclusivamente no navegador:
+
+- localStorage guarda contas, workspaces e memberships simulados;
+- sessionStorage guarda a sessão da aba atual;
+- o botão **Restaurar demonstração** apaga as alterações locais e recria o seed
+  versionado no repositório.
+
+Não há sincronização dessa simulação com GitHub, API ou banco de dados. GitHub
+armazena o código e o seed; interações feitas no navegador não são publicadas.
+
 ## Verificação
 
 ```bash

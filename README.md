@@ -9,7 +9,8 @@ Fundação técnica do MVP fictício da NexoFlux: uma plataforma multi-tenant pa
 - Marco 02.1: verificador automatizado de integração persistente, aguardando infraestrutura local.
 - Marco 03: simulação web autenticada com contas locais, workspaces e RBAC sem banco de dados.
 - Marco 04: agenda operacional simulada, com tarefas permitidas, logs e adaptador local do X.
-- Próximos marcos: integração da interface com a API, integrações autorizadas com o X, cobrança e observabilidade de produção.
+- Marco 05: planos e consumo simulados com cotas por workspace e upgrade local.
+- Próximos marcos: cobrança sandbox, administração, integração da interface com a API, integrações autorizadas com o X e observabilidade de produção.
 
 A documentação completa está em [docs/INDEX.md](./docs/INDEX.md). Código, testes e documentação fazem parte do mesmo critério de conclusão.
 
@@ -59,6 +60,7 @@ O atalho pnpm check executa toda a sequência acima, exceto formatação com esc
 - [Marco 02.1 — Validação de integração](./docs/marco-02-1-validacao-integracao.md)
 - [Marco 03 — Simulação web autenticada](./docs/marco-03-simulacao-web.md)
 - [Marco 04 — Agenda operacional simulada](./docs/marco-04-agenda-operacional-simulada.md)
+- [Marco 05 — Planos e consumo simulados](./docs/marco-05-planos-consumo-simulado.md)
 - [Publicação no GitHub Pages](./docs/publicacao-github-pages.md)
 - [Arquitetura](./docs/arquitetura.md)
 - [Modelo de dados](./docs/modelo-de-dados.md)

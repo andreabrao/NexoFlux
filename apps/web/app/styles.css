@@ -970,7 +970,7 @@ code {
 .workspaceStats {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 1.5rem 0 3.5rem;
 }
 
@@ -1016,6 +1016,128 @@ code {
   border-radius: 1rem;
   margin: 0 0 1.5rem;
   padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.planArea {
+  background: #f9fbff;
+  border: 1px solid #d8e1ed;
+  border-radius: 1rem;
+  margin: 0 0 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.consumptionMeter {
+  background: white;
+  border: 1px solid #d8e1ed;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  padding: 1rem;
+}
+
+.consumptionMeter > div:first-child {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: space-between;
+}
+
+.consumptionMeter strong {
+  font-size: 0.88rem;
+}
+
+.consumptionMeter span {
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+.meterTrack {
+  background: #e3eaf3;
+  border-radius: 999px;
+  height: 0.55rem;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.meterTrack > span {
+  background: linear-gradient(90deg, #2d7c61, #4dac7d);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transition: width 180ms ease;
+}
+
+.planGrid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.planCard {
+  background: white;
+  border: 1px solid #d8e1ed;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 12rem;
+  padding: 1rem;
+}
+
+.planCardActive {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgb(45 124 97 / 12%);
+}
+
+.planCard > div {
+  align-items: baseline;
+  display: flex;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+
+.planCard > div strong {
+  font-size: 0.98rem;
+}
+
+.planCard > div span,
+.planCard small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.planCard > p {
+  font-size: 0.82rem;
+  font-weight: 730;
+  line-height: 1.4;
+  margin: 1rem 0 0.25rem;
+}
+
+.planCard small {
+  margin-bottom: 1rem;
+}
+
+.planCard button,
+.currentPlanLabel {
+  margin-top: auto;
+  text-align: center;
+}
+
+.selectedPlanButton,
+.currentPlanLabel {
+  background: var(--green-soft);
+  border: 1px solid #b7dac8;
+  border-radius: 0.5rem;
+  color: #17683e;
+  font-size: 0.73rem;
+  font-weight: 760;
+  padding: 0.55rem 0.6rem;
+}
+
+.planDisclaimer {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  margin: 1rem 0 0;
 }
 
 .taskForm {
@@ -1376,6 +1498,10 @@ code {
     grid-template-columns: 1fr;
   }
 
+  .workspaceStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .appSidebar {
     min-height: auto;
   }
@@ -1489,6 +1615,10 @@ code {
   }
 
   .taskForm {
+    grid-template-columns: 1fr;
+  }
+
+  .planGrid {
     grid-template-columns: 1fr;
   }
 

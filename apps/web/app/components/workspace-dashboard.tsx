@@ -8,6 +8,9 @@ import type { WorkspaceRole } from "@nexoflux/contracts";
 
 import {
   createDemoRepository,
+  demoPlans,
+  type DemoConsumption,
+  type DemoPlan,
   type DemoSession,
   type DemoWorkspaceTask,
   type DemoUserProfile,
@@ -20,6 +23,7 @@ import { clearDemoSession, readDemoSession } from "../lib/demo-session";
 const roles: WorkspaceRole[] = ["OWNER", "ADMIN", "OPERATOR", "VIEWER"];
 
 type DashboardData = {
+  consumption: DemoConsumption;
   members: DemoWorkspaceMember[];
   selectedWorkspaceId: string;
   tasks: DemoWorkspaceTask[];
@@ -65,6 +69,10 @@ export function WorkspaceDashboard() {
     }
 
     setDashboard({
+      consumption: repository.getConsumption(
+        selectedWorkspace.id,
+        activeSession.userId,
+      ),
       members: repository.listMembers(
         selectedWorkspace.id,
         activeSession.userId,
@@ -245,6 +253,16 @@ export function WorkspaceDashboard() {
     }, "Tarefa cancelada.");
   };
 
+  const changePlan = (plan: DemoPlan): void => {
+    updateDashboard((activeSession, selectedWorkspaceId) => {
+      createDemoRepository(window.localStorage).changePlan(
+        activeSession.userId,
+        selectedWorkspaceId,
+        plan,
+      );
+    }, "Plano atualizado somente para esta demonstração.");
+  };
+
   const logout = (): void => {
     clearDemoSession(window.sessionStorage);
     router.push("/entrar");
@@ -313,6 +331,7 @@ export function WorkspaceDashboard() {
   const canInvite =
     selectedWorkspace.role === "OWNER" || selectedWorkspace.role === "ADMIN";
   const canChangeRoles = selectedWorkspace.role === "OWNER";
+  const canChangePlan = selectedWorkspace.role === "OWNER";
   const canOperateTasks =
     selectedWorkspace.role === "OWNER" ||
     selectedWorkspace.role === "ADMIN" ||
@@ -451,7 +470,95 @@ export function WorkspaceDashboard() {
             <strong>{scheduledTasks.length}</strong>
             <p>tarefas aguardando execução</p>
           </article>
+          <article>
+            <span>Consumo do plano</span>
+            <strong>
+              {dashboard.consumption.used}/
+              {dashboard.consumption.executionLimit}
+            </strong>
+            <p>
+              {demoPlans[selectedWorkspace.plan].label} · execuções no ciclo
+            </p>
+          </article>
         </div>
+
+        <section className="planArea">
+          <div className="sectionHeading">
+            <div>
+              <p className="eyebrow">Marco 05 · Planos e consumo</p>
+              <h2>Uso controlado por workspace</h2>
+              <p>
+                Cada execução concluída consome uma cota local. Ao atingir o
+                limite, novas execuções são bloqueadas e os dados são
+                preservados.
+              </p>
+            </div>
+          </div>
+          <div className="consumptionMeter">
+            <div>
+              <strong>
+                {dashboard.consumption.used} de{" "}
+                {dashboard.consumption.executionLimit} execuções
+              </strong>
+              <span>
+                {dashboard.consumption.remaining} disponíveis neste ciclo
+              </span>
+            </div>
+            <div
+              aria-label={
+                dashboard.consumption.percentage + "% da cota utilizada"
+              }
+              className="meterTrack"
+              role="progressbar"
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={dashboard.consumption.percentage}
+            >
+              <span style={{ width: dashboard.consumption.percentage + "%" }} />
+            </div>
+          </div>
+          <div className="planGrid" role="list" aria-label="Planos simulados">
+            {(Object.keys(demoPlans) as DemoPlan[]).map((plan) => {
+              const definition = demoPlans[plan];
+              const isActive = selectedWorkspace.plan === plan;
+              return (
+                <article
+                  className={isActive ? "planCard planCardActive" : "planCard"}
+                  key={plan}
+                  role="listitem"
+                >
+                  <div>
+                    <strong>{definition.label}</strong>
+                    <span>R$ {definition.monthlyPrice}/mês</span>
+                  </div>
+                  <p>
+                    {definition.executionLimit.toLocaleString("pt-BR")}{" "}
+                    execuções/mês
+                  </p>
+                  <small>{definition.retentionDays} dias de logs</small>
+                  {canChangePlan ? (
+                    <button
+                      className={
+                        isActive ? "selectedPlanButton" : "secondaryButton"
+                      }
+                      disabled={isBusy || isActive}
+                      onClick={() => changePlan(plan)}
+                      type="button"
+                    >
+                      {isActive ? "Plano atual" : "Simular plano"}
+                    </button>
+                  ) : isActive ? (
+                    <span className="currentPlanLabel">Plano atual</span>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+          <p className="planDisclaimer">
+            Valores e limites são hipóteses do kickoff. Não há cobrança, Stripe
+            ou alteração contratual nesta simulação.
+          </p>
+        </section>
 
         <section className="taskArea">
           <div className="sectionHeading">

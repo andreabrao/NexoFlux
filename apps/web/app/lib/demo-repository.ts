@@ -42,7 +42,46 @@ export type DemoWorkspace = {
   createdAt: string;
   id: string;
   name: string;
+  plan: DemoPlan;
   slug: string;
+};
+
+export type DemoPlan = "STARTER" | "PRO" | "AGENCY";
+
+export type DemoPlanDefinition = {
+  executionLimit: number;
+  label: string;
+  monthlyPrice: number;
+  retentionDays: number;
+};
+
+export const demoPlans: Record<DemoPlan, DemoPlanDefinition> = {
+  AGENCY: {
+    executionLimit: 20000,
+    label: "Agência",
+    monthlyPrice: 299,
+    retentionDays: 180,
+  },
+  PRO: {
+    executionLimit: 3000,
+    label: "Pro",
+    monthlyPrice: 129,
+    retentionDays: 90,
+  },
+  STARTER: {
+    executionLimit: 500,
+    label: "Starter",
+    monthlyPrice: 49,
+    retentionDays: 30,
+  },
+};
+
+export type DemoConsumption = {
+  executionLimit: number;
+  percentage: number;
+  plan: DemoPlan;
+  remaining: number;
+  used: number;
 };
 
 export type DemoMember = {
@@ -207,6 +246,7 @@ const seedStore: DemoStore = {
       createdAt: CREATED_AT,
       id: WORKSPACE_ID,
       name: "NexoFlux Operações",
+      plan: "STARTER",
       slug: "nexoflux-operacoes",
     },
   ],
@@ -324,6 +364,31 @@ export function createDemoRepository(storage: StorageLike) {
       .sort((first, second) => second.createdAt.localeCompare(first.createdAt)),
   });
 
+  const consumptionFor = (
+    store: DemoStore,
+    workspaceId: string,
+  ): DemoConsumption => {
+    const workspace = store.workspaces.find(
+      (candidate) => candidate.id === workspaceId,
+    );
+    if (!workspace) {
+      throw new DemoRepositoryError("Workspace não encontrado no simulador.");
+    }
+
+    const used = store.tasks.filter(
+      (task) => task.workspaceId === workspaceId && task.status === "SUCCEEDED",
+    ).length;
+    const executionLimit = demoPlans[workspace.plan].executionLimit;
+
+    return {
+      executionLimit,
+      percentage: Math.min(100, Math.round((used / executionLimit) * 100)),
+      plan: workspace.plan,
+      remaining: Math.max(0, executionLimit - used),
+      used,
+    };
+  };
+
   const listWorkspaces = (userId: string): DemoWorkspaceSummary[] => {
     const store = read();
 
@@ -413,6 +478,30 @@ export function createDemoRepository(storage: StorageLike) {
       write(store);
 
       return taskView(store, task);
+    },
+
+    changePlan(
+      actorUserId: string,
+      workspaceId: string,
+      plan: DemoPlan,
+    ): DemoWorkspaceSummary {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (membership.role !== "OWNER") {
+        throw new DemoRepositoryError(
+          "Somente Owners podem simular uma mudança de plano.",
+        );
+      }
+      const workspace = store.workspaces.find(
+        (candidate) => candidate.id === workspaceId,
+      );
+      if (!workspace) {
+        throw new DemoRepositoryError("Workspace não encontrado no simulador.");
+      }
+
+      workspace.plan = plan;
+      write(store);
+      return { ...workspace, role: membership.role };
     },
 
     addMember(
@@ -508,6 +597,7 @@ export function createDemoRepository(storage: StorageLike) {
         createdAt: new Date().toISOString(),
         id: newId(),
         name: name.trim(),
+        plan: "STARTER",
         slug: makeSlug(name),
       };
       store.workspaces.push(workspace);
@@ -524,6 +614,12 @@ export function createDemoRepository(storage: StorageLike) {
 
     getUser(userId: string): DemoUserProfile {
       return removePassword(requireUser(read(), userId));
+    },
+
+    getConsumption(workspaceId: string, actorUserId: string): DemoConsumption {
+      const store = read();
+      requireMembership(store, workspaceId, actorUserId);
+      return consumptionFor(store, workspaceId);
     },
 
     listTasks(workspaceId: string, actorUserId: string): DemoWorkspaceTask[] {
@@ -604,6 +700,7 @@ export function createDemoRepository(storage: StorageLike) {
         createdAt: new Date().toISOString(),
         id: newId(),
         name: input.workspaceName.trim(),
+        plan: "STARTER",
         slug: makeSlug(input.workspaceName),
       };
       store.users.push(user);
@@ -690,6 +787,12 @@ export function createDemoRepository(storage: StorageLike) {
       if (task.status !== "SCHEDULED") {
         throw new DemoRepositoryError(
           "Somente tarefas agendadas podem ser executadas.",
+        );
+      }
+      const consumption = consumptionFor(store, workspaceId);
+      if (consumption.remaining === 0) {
+        throw new DemoRepositoryError(
+          "O limite de execuções deste plano foi atingido. Simule um upgrade para continuar.",
         );
       }
 

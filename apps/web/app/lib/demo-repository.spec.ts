@@ -161,4 +161,60 @@ describe("demo repository", () => {
       repository.runTask(owner.user.id, owner.workspace.id, task.id),
     ).toThrow("Somente tarefas agendadas");
   });
+
+  it("exposes seeded consumption and lets only Owner simulate a plan change", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const admin = repository.authenticate(ADMIN_EMAIL, DEMO_PASSWORD);
+
+    expect(
+      repository.getConsumption(owner.workspace.id, owner.user.id),
+    ).toMatchObject({
+      executionLimit: 500,
+      plan: "STARTER",
+      remaining: 499,
+      used: 1,
+    });
+    expect(() =>
+      repository.changePlan(admin.user.id, owner.workspace.id, "PRO"),
+    ).toThrow("Somente Owners");
+
+    repository.changePlan(owner.user.id, owner.workspace.id, "PRO");
+    expect(
+      repository.getConsumption(owner.workspace.id, owner.user.id),
+    ).toMatchObject({
+      executionLimit: 3000,
+      plan: "PRO",
+      used: 1,
+    });
+  });
+
+  it("blocks a new execution after the plan quota is consumed", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+
+    for (let index = 0; index < 499; index += 1) {
+      const task = repository.createTask(owner.user.id, {
+        content: "Tarefa de consumo " + index,
+        scheduledAt: "2026-08-14T14:00:00.000Z",
+        workspaceId: owner.workspace.id,
+      });
+      repository.runTask(owner.user.id, owner.workspace.id, task.id);
+    }
+
+    expect(
+      repository.getConsumption(owner.workspace.id, owner.user.id),
+    ).toMatchObject({
+      remaining: 0,
+      used: 500,
+    });
+    const blockedTask = repository.createTask(owner.user.id, {
+      content: "Tarefa que excede a cota.",
+      scheduledAt: "2026-08-14T14:00:00.000Z",
+      workspaceId: owner.workspace.id,
+    });
+    expect(() =>
+      repository.runTask(owner.user.id, owner.workspace.id, blockedTask.id),
+    ).toThrow("limite de execuções");
+  });
 });

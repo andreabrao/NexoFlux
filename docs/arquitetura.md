@@ -34,6 +34,14 @@ execução simulada. A implementação não acessa a API do X, OAuth, proxy ou
 segredos. Quando a integração real for iniciada, este adaptador será substituído
 sem acoplar o dashboard ao SDK do provedor.
 
+### Planos e consumo do Marco 5
+
+O plano e o consumo demonstrativos pertencem ao workspace e são calculados no
+repositório local antes de uma execução. A interface não decide se a execução
+é permitida: ela solicita a operação ao repositório, que aplica a cota e a
+regra de Owner para troca de plano. Em produção, essa responsabilidade migrará
+para a API, integrada ao billing e ao ledger de consumo.
+
 ## Componentes
 
 ### packages/contracts

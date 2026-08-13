@@ -9,6 +9,7 @@ import type { WorkspaceRole } from "@nexoflux/contracts";
 import {
   createDemoRepository,
   demoPlans,
+  type DemoBillingOverview,
   type DemoConsumption,
   type DemoPlan,
   type DemoSession,
@@ -23,6 +24,7 @@ import { clearDemoSession, readDemoSession } from "../lib/demo-session";
 const roles: WorkspaceRole[] = ["OWNER", "ADMIN", "OPERATOR", "VIEWER"];
 
 type DashboardData = {
+  billing: DemoBillingOverview;
   consumption: DemoConsumption;
   members: DemoWorkspaceMember[];
   selectedWorkspaceId: string;
@@ -69,6 +71,10 @@ export function WorkspaceDashboard() {
     }
 
     setDashboard({
+      billing: repository.getBilling(
+        selectedWorkspace.id,
+        activeSession.userId,
+      ),
       consumption: repository.getConsumption(
         selectedWorkspace.id,
         activeSession.userId,
@@ -261,6 +267,23 @@ export function WorkspaceDashboard() {
         plan,
       );
     }, "Plano atualizado somente para esta demonstração.");
+  };
+
+  const simulateBillingWebhook = (
+    kind: "PAYMENT_FAILED" | "PAYMENT_SUCCEEDED" | "SUBSCRIPTION_CANCELED",
+  ): void => {
+    const messages = {
+      PAYMENT_FAILED: "Falha de cobrança simulada e reconciliada.",
+      PAYMENT_SUCCEEDED: "Pagamento simulado e assinatura regularizada.",
+      SUBSCRIPTION_CANCELED: "Cancelamento simulado e reconciliado.",
+    };
+    updateDashboard((activeSession, selectedWorkspaceId) => {
+      createDemoRepository(window.localStorage).simulateBillingWebhook(
+        activeSession.userId,
+        selectedWorkspaceId,
+        kind,
+      );
+    }, messages[kind]);
   };
 
   const logout = (): void => {
@@ -558,6 +581,104 @@ export function WorkspaceDashboard() {
             Valores e limites são hipóteses do kickoff. Não há cobrança, Stripe
             ou alteração contratual nesta simulação.
           </p>
+        </section>
+
+        <section className="billingArea">
+          <div className="sectionHeading">
+            <div>
+              <p className="eyebrow">Marco 06 · Cobrança sandbox</p>
+              <h2>Assinatura e reconciliação simuladas</h2>
+              <p>
+                Eventos abaixo representam webhooks do Stripe em modo local.
+                Nenhum cartão, chave, endpoint ou cobrança real é utilizado.
+              </p>
+            </div>
+            <strong
+              className={
+                "billingStatus billing" + dashboard.billing.subscription.status
+              }
+            >
+              {dashboard.billing.subscription.status}
+            </strong>
+          </div>
+          <div className="billingSummary">
+            <article>
+              <span>Plano atual</span>
+              <strong>
+                {demoPlans[dashboard.billing.subscription.plan].label}
+              </strong>
+              <p>
+                {dashboard.billing.subscription.billingCycle === "ANNUAL"
+                  ? "cobrança anual simulada"
+                  : "cobrança mensal simulada"}
+              </p>
+            </article>
+            <article>
+              <span>Próximo ciclo</span>
+              <strong>
+                {new Intl.DateTimeFormat("pt-BR", {
+                  dateStyle: "medium",
+                }).format(
+                  new Date(dashboard.billing.subscription.currentPeriodEnd),
+                )}
+              </strong>
+              <p>data informativa do simulador</p>
+            </article>
+          </div>
+          {canChangePlan ? (
+            <div className="webhookActions">
+              <span>Simular webhook:</span>
+              <button
+                className="secondaryButton"
+                disabled={isBusy}
+                onClick={() => simulateBillingWebhook("PAYMENT_SUCCEEDED")}
+                type="button"
+              >
+                Pagamento aprovado
+              </button>
+              <button
+                className="secondaryButton"
+                disabled={isBusy}
+                onClick={() => simulateBillingWebhook("PAYMENT_FAILED")}
+                type="button"
+              >
+                Falha de pagamento
+              </button>
+              <button
+                className="dangerButton"
+                disabled={isBusy}
+                onClick={() => simulateBillingWebhook("SUBSCRIPTION_CANCELED")}
+                type="button"
+              >
+                Cancelar assinatura
+              </button>
+            </div>
+          ) : (
+            <p className="readOnlyNotice">
+              Somente o Owner pode simular eventos de cobrança nesta
+              demonstração.
+            </p>
+          )}
+          <ol className="billingEvents" aria-label="Histórico de cobrança">
+            {dashboard.billing.events.map((event) => (
+              <li key={event.id}>
+                <span className={"eventDot event" + event.status} />
+                <div>
+                  <div>
+                    <strong>{event.type}</strong>
+                    <time dateTime={event.createdAt}>
+                      {new Intl.DateTimeFormat("pt-BR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      }).format(new Date(event.createdAt))}
+                    </time>
+                  </div>
+                  <p>{event.detail}</p>
+                  <small>{event.providerEventId}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
 
         <section className="taskArea">

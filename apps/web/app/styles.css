@@ -1140,6 +1140,134 @@ code {
   margin: 1rem 0 0;
 }
 
+.billingArea {
+  background: #fbf8ff;
+  border: 1px solid #e1d9ef;
+  border-radius: 1rem;
+  margin: 0 0 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.billingStatus {
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  padding: 0.35rem 0.55rem;
+}
+
+.billingACTIVE {
+  background: var(--green-soft);
+  color: #17683e;
+}
+
+.billingPAST_DUE {
+  background: #fff0cf;
+  color: #885100;
+}
+
+.billingCANCELED {
+  background: var(--red-soft);
+  color: #b33636;
+}
+
+.billingSummary {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 1.5rem 0;
+}
+
+.billingSummary article {
+  background: white;
+  border: 1px solid #e1d9ef;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.billingSummary span,
+.billingSummary p {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.billingSummary span {
+  display: block;
+  font-weight: 720;
+  text-transform: uppercase;
+}
+
+.billingSummary strong {
+  display: block;
+  font-size: 1rem;
+  margin-top: 0.55rem;
+}
+
+.billingSummary p {
+  margin: 0.3rem 0 0;
+}
+
+.webhookActions {
+  align-items: center;
+  border-bottom: 1px solid #e1d9ef;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding-bottom: 1rem;
+}
+
+.webhookActions > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 740;
+}
+
+.billingEvents {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.billingEvents li {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.billingEvents li > div {
+  min-width: 0;
+}
+
+.billingEvents li > div > div {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.billingEvents strong {
+  font-size: 0.72rem;
+}
+
+.billingEvents time,
+.billingEvents small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.billingEvents p {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  margin: 0.14rem 0;
+}
+
+.billingEvents small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
 .taskForm {
   align-items: end;
   border-bottom: 1px solid #d7e3dc;
@@ -1619,6 +1747,10 @@ code {
   }
 
   .planGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .billingSummary {
     grid-template-columns: 1fr;
   }
 

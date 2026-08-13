@@ -217,4 +217,53 @@ describe("demo repository", () => {
       repository.runTask(owner.user.id, owner.workspace.id, blockedTask.id),
     ).toThrow("limite de execuções");
   });
+
+  it("reconciles simulated billing events and pauses execution while past due", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+
+    repository.simulateBillingWebhook(
+      owner.user.id,
+      owner.workspace.id,
+      "PAYMENT_FAILED",
+    );
+    expect(
+      repository.getBilling(owner.workspace.id, owner.user.id).subscription
+        .status,
+    ).toBe("PAST_DUE");
+
+    const task = repository.createTask(owner.user.id, {
+      content: "Não deve executar enquanto a cobrança está pendente.",
+      scheduledAt: "2026-08-14T14:00:00.000Z",
+      workspaceId: owner.workspace.id,
+    });
+    expect(() =>
+      repository.runTask(owner.user.id, owner.workspace.id, task.id),
+    ).toThrow("assinatura não está ativa");
+
+    repository.simulateBillingWebhook(
+      owner.user.id,
+      owner.workspace.id,
+      "PAYMENT_SUCCEEDED",
+    );
+    repository.runTask(owner.user.id, owner.workspace.id, task.id);
+    expect(
+      repository.getBilling(owner.workspace.id, owner.user.id).subscription
+        .status,
+    ).toBe("ACTIVE");
+  });
+
+  it("allows only Owner to simulate a billing webhook", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const admin = repository.authenticate(ADMIN_EMAIL, DEMO_PASSWORD);
+
+    expect(() =>
+      repository.simulateBillingWebhook(
+        admin.user.id,
+        owner.workspace.id,
+        "PAYMENT_FAILED",
+      ),
+    ).toThrow("Somente Owners");
+  });
 });

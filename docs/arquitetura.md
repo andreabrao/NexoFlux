@@ -42,6 +42,14 @@ repositório local antes de uma execução. A interface não decide se a execuç
 regra de Owner para troca de plano. Em produção, essa responsabilidade migrará
 para a API, integrada ao billing e ao ledger de consumo.
 
+### Cobrança sandbox do Marco 6
+
+O dashboard consulta o repositório de demonstração para exibir a assinatura e
+os eventos reconciliados. O adaptador local de Stripe devolve eventos sintéticos
+e o repositório aplica o status antes de liberar uma execução. Em produção, o
+webhook será recebido e validado pela API, que manterá o registro financeiro e
+de consumo no servidor.
+
 ## Componentes
 
 ### packages/contracts

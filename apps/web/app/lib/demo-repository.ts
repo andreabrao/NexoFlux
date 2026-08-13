@@ -1,6 +1,10 @@
 import type { TaskStatus, WorkspaceRole } from "@nexoflux/contracts";
 
 import { executeMockXTask } from "./demo-x-adapter";
+import {
+  createMockStripeWebhook,
+  type DemoStripeWebhookKind,
+} from "./demo-stripe-adapter";
 
 export const DEMO_PASSWORD = "NexoFlux-demo-2026!";
 
@@ -84,6 +88,32 @@ export type DemoConsumption = {
   used: number;
 };
 
+export type DemoBillingCycle = "MONTHLY" | "ANNUAL";
+
+export type DemoBillingStatus = "ACTIVE" | "PAST_DUE" | "CANCELED";
+
+export type DemoSubscription = {
+  billingCycle: DemoBillingCycle;
+  createdAt: string;
+  currentPeriodEnd: string;
+  id: string;
+  plan: DemoPlan;
+  status: DemoBillingStatus;
+  updatedAt: string;
+  workspaceId: string;
+};
+
+export type DemoBillingEvent = {
+  createdAt: string;
+  detail: string;
+  id: string;
+  providerEventId: string;
+  status: DemoBillingStatus;
+  subscriptionId: string;
+  type: string;
+  workspaceId: string;
+};
+
 export type DemoMember = {
   createdAt: string;
   role: WorkspaceRole;
@@ -111,7 +141,9 @@ export type DemoTaskEvent = {
 };
 
 export type DemoStore = {
+  billingEvents: DemoBillingEvent[];
   members: DemoMember[];
+  subscriptions: DemoSubscription[];
   taskEvents: DemoTaskEvent[];
   tasks: DemoTask[];
   users: DemoUser[];
@@ -142,6 +174,11 @@ export type DemoWorkspaceTask = DemoTask & {
   events: DemoTaskEvent[];
 };
 
+export type DemoBillingOverview = {
+  events: DemoBillingEvent[];
+  subscription: DemoSubscription;
+};
+
 export type DemoAuthResult = {
   session: DemoSession;
   user: DemoUserProfile;
@@ -159,6 +196,18 @@ const WORKSPACE_ID = "e2fcb9d1-83ce-4e5d-bd4c-11c7af1a5001";
 const CREATED_AT = "2026-08-13T12:00:00.000Z";
 
 const seedStore: DemoStore = {
+  billingEvents: [
+    {
+      createdAt: "2026-08-13T12:00:00.000Z",
+      detail: "Assinatura Starter mensal criada e reconciliada no simulador.",
+      id: "9fca5375-1c6f-4e2e-9951-d9c582540001",
+      providerEventId: "evt_mock_invoice_paid_seed",
+      status: "ACTIVE",
+      subscriptionId: "cfbd4264-0b5e-4d1d-8840-c8b471430001",
+      type: "invoice.paid.monthly",
+      workspaceId: WORKSPACE_ID,
+    },
+  ],
   members: [
     {
       createdAt: CREATED_AT,
@@ -182,6 +231,18 @@ const seedStore: DemoStore = {
       createdAt: CREATED_AT,
       role: "VIEWER",
       userId: "d5abe1ef-9263-4f5a-8990-707d93708004",
+      workspaceId: WORKSPACE_ID,
+    },
+  ],
+  subscriptions: [
+    {
+      billingCycle: "MONTHLY",
+      createdAt: CREATED_AT,
+      currentPeriodEnd: "2026-09-13T12:00:00.000Z",
+      id: "cfbd4264-0b5e-4d1d-8840-c8b471430001",
+      plan: "STARTER",
+      status: "ACTIVE",
+      updatedAt: CREATED_AT,
       workspaceId: WORKSPACE_ID,
     },
   ],
@@ -295,7 +356,53 @@ export function createDemoRepository(storage: StorageLike) {
     }
 
     try {
-      return JSON.parse(rawStore) as DemoStore;
+      const stored = JSON.parse(rawStore) as Partial<DemoStore>;
+      const store: DemoStore = {
+        ...stored,
+        billingEvents: stored.billingEvents ?? [],
+        subscriptions: stored.subscriptions ?? [],
+        taskEvents: stored.taskEvents ?? [],
+        tasks: stored.tasks ?? [],
+      } as DemoStore;
+
+      for (const workspace of store.workspaces) {
+        if (!workspace.plan) {
+          workspace.plan = "STARTER";
+        }
+        if (
+          !store.subscriptions.some(
+            (subscription) => subscription.workspaceId === workspace.id,
+          )
+        ) {
+          const subscription: DemoSubscription = {
+            billingCycle: "MONTHLY",
+            createdAt: workspace.createdAt,
+            currentPeriodEnd: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            id: newId(),
+            plan: workspace.plan,
+            status: "ACTIVE",
+            updatedAt: new Date().toISOString(),
+            workspaceId: workspace.id,
+          };
+          store.subscriptions.push(subscription);
+          store.billingEvents.push({
+            createdAt: subscription.updatedAt,
+            detail:
+              "Assinatura inicial criada automaticamente para compatibilidade do simulador.",
+            id: newId(),
+            providerEventId:
+              "evt_mock_migration_" + subscription.id.slice(0, 8),
+            status: "ACTIVE",
+            subscriptionId: subscription.id,
+            type: "invoice.paid.monthly",
+            workspaceId: workspace.id,
+          });
+        }
+      }
+
+      return store;
     } catch {
       return cloneStore(seedStore);
     }
@@ -387,6 +494,47 @@ export function createDemoRepository(storage: StorageLike) {
       remaining: Math.max(0, executionLimit - used),
       used,
     };
+  };
+
+  const requireSubscription = (
+    store: DemoStore,
+    workspaceId: string,
+  ): DemoSubscription => {
+    const subscription = store.subscriptions.find(
+      (candidate) => candidate.workspaceId === workspaceId,
+    );
+    if (!subscription) {
+      throw new DemoRepositoryError("Assinatura não encontrada no simulador.");
+    }
+    return subscription;
+  };
+
+  const recordBillingEvent = (
+    store: DemoStore,
+    subscription: DemoSubscription,
+    input: { detail: string; kind: DemoStripeWebhookKind },
+  ): DemoBillingEvent => {
+    const webhook = createMockStripeWebhook({
+      billingCycle: subscription.billingCycle,
+      plan: subscription.plan,
+      subscriptionId: subscription.id,
+      type: input.kind,
+    });
+    subscription.status = webhook.status;
+    subscription.updatedAt = new Date().toISOString();
+
+    const event: DemoBillingEvent = {
+      createdAt: subscription.updatedAt,
+      detail: input.detail,
+      id: newId(),
+      providerEventId: webhook.id,
+      status: webhook.status,
+      subscriptionId: subscription.id,
+      type: webhook.type,
+      workspaceId: subscription.workspaceId,
+    };
+    store.billingEvents.push(event);
+    return event;
   };
 
   const listWorkspaces = (userId: string): DemoWorkspaceSummary[] => {
@@ -500,6 +648,15 @@ export function createDemoRepository(storage: StorageLike) {
       }
 
       workspace.plan = plan;
+      const subscription = requireSubscription(store, workspaceId);
+      subscription.plan = plan;
+      recordBillingEvent(store, subscription, {
+        detail:
+          "Plano alterado para " +
+          demoPlans[plan].label +
+          " e reconciliado no adaptador Stripe simulado.",
+        kind: "PAYMENT_SUCCEEDED",
+      });
       write(store);
       return { ...workspace, role: membership.role };
     },
@@ -620,6 +777,21 @@ export function createDemoRepository(storage: StorageLike) {
       const store = read();
       requireMembership(store, workspaceId, actorUserId);
       return consumptionFor(store, workspaceId);
+    },
+
+    getBilling(workspaceId: string, actorUserId: string): DemoBillingOverview {
+      const store = read();
+      requireMembership(store, workspaceId, actorUserId);
+      const subscription = requireSubscription(store, workspaceId);
+
+      return {
+        events: store.billingEvents
+          .filter((event) => event.workspaceId === workspaceId)
+          .sort((first, second) =>
+            second.createdAt.localeCompare(first.createdAt),
+          ),
+        subscription: { ...subscription },
+      };
     },
 
     listTasks(workspaceId: string, actorUserId: string): DemoWorkspaceTask[] {
@@ -795,6 +967,12 @@ export function createDemoRepository(storage: StorageLike) {
           "O limite de execuções deste plano foi atingido. Simule um upgrade para continuar.",
         );
       }
+      const subscription = requireSubscription(store, workspaceId);
+      if (subscription.status !== "ACTIVE") {
+        throw new DemoRepositoryError(
+          "A assinatura não está ativa. Regularize a cobrança simulada antes de executar novas tarefas.",
+        );
+      }
 
       task.status = "RUNNING";
       addTaskEvent(
@@ -807,6 +985,43 @@ export function createDemoRepository(storage: StorageLike) {
       task.status = "SUCCEEDED";
       addTaskEvent(store, task, "SUCCEEDED", execution.message);
       write(store);
+    },
+
+    simulateBillingWebhook(
+      actorUserId: string,
+      workspaceId: string,
+      kind: DemoStripeWebhookKind,
+    ): DemoBillingOverview {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (membership.role !== "OWNER") {
+        throw new DemoRepositoryError(
+          "Somente Owners podem simular eventos de cobrança.",
+        );
+      }
+      const subscription = requireSubscription(store, workspaceId);
+      const details: Record<DemoStripeWebhookKind, string> = {
+        PAYMENT_FAILED:
+          "Falha de cobrança simulada; novas execuções serão bloqueadas até a regularização.",
+        PAYMENT_SUCCEEDED:
+          "Pagamento simulado recebido e assinatura reconciliada como ativa.",
+        SUBSCRIPTION_CANCELED:
+          "Cancelamento simulado recebido; a assinatura foi marcada como encerrada.",
+      };
+      recordBillingEvent(store, subscription, {
+        detail: details[kind],
+        kind,
+      });
+      write(store);
+
+      return {
+        events: store.billingEvents
+          .filter((event) => event.workspaceId === workspaceId)
+          .sort((first, second) =>
+            second.createdAt.localeCompare(first.createdAt),
+          ),
+        subscription: { ...subscription },
+      };
     },
 
     reset(): void {

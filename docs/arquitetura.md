@@ -1,0 +1,87 @@
+# Arquitetura
+
+## Visão geral
+
+```mermaid
+flowchart LR
+  Client[Cliente web ou API] -->|HTTP /api/v1| API[API NestJS]
+  API --> Auth[AuthGuard global]
+  Auth --> RBAC[WorkspaceRolesGuard]
+  RBAC --> Services[Serviços de domínio]
+  Services --> Repositories[Repositórios SQL]
+  Repositories --> Postgres[(PostgreSQL)]
+  API --> Redis[(Redis)]
+  Worker[Worker BullMQ] --> Redis
+  Worker --> Postgres
+```
+
+A API é a fronteira de identidade e autorização. O PostgreSQL mantém identidade, sessões, workspaces, memberships e auditoria. O Redis permanece reservado para filas e coordenação assíncrona; ele não participa da autenticação deste marco.
+
+## Componentes
+
+### packages/contracts
+
+Schemas Zod e tipos compartilhados. Centraliza normalização de e-mail, política mínima de senha, papéis de workspace e payloads HTTP.
+
+### apps/api/src/auth
+
+Responsável por derivação de senha, emissão e hash de tokens, cadastro, login, logout, resolução de sessão e contexto do usuário autenticado.
+
+### apps/api/src/workspaces
+
+Responsável por workspaces, memberships, matriz de funções e invariantes administrativas. Controllers validam entradas; services aplicam políticas; repositories garantem atomicidade e locks.
+
+### apps/api/src/database
+
+Mantém um pool PostgreSQL compartilhado e fornece transações com commit, rollback e liberação garantida do client.
+
+### apps/api/src/common
+
+Contém os mecanismos transversais: marcação de rota pública e tradução de falhas de schema para erro HTTP 400.
+
+## Fluxo de requisição autenticada
+
+```mermaid
+sequenceDiagram
+  participant C as Cliente
+  participant A as AuthGuard
+  participant S as AuthService
+  participant W as WorkspaceRolesGuard
+  participant H as Handler
+  C->>A: Authorization: Bearer token
+  A->>S: hash(token) e busca de sessão ativa
+  S-->>A: usuário + sessão
+  A->>A: anexa request.auth
+  A->>W: continua cadeia de guards
+  W->>W: valida workspaceId e membership
+  W->>W: compara função com metadados da rota
+  W->>H: anexa request.membership
+  H-->>C: resposta do recurso
+```
+
+## Decisões
+
+### PostgreSQL e SQL explícito
+
+O marco usa pg e migrações SQL versionadas. Isso mantém constraints e transações visíveis, evita acoplamento precoce a um ORM e facilita auditar as regras de isolamento.
+
+### Sessão opaca revogável
+
+O cliente recebe um token aleatório. O banco armazena somente seu hash. Cada requisição resolve a sessão ativa no banco; logout marca revoked_at. O custo é uma consulta por requisição, aceito neste estágio para obter revogação imediata e comportamento simples.
+
+### Autorização negada por padrão
+
+AuthGuard é global. Uma rota somente se torna pública com o decorator Public. Regras de workspace são declaradas com WorkspaceRoles e verificadas por um segundo guard global.
+
+### Serviços e repositórios
+
+Políticas legíveis ficam nos services. Invariantes que dependem de concorrência ficam em transações dos repositories. Controllers apenas validam e traduzem HTTP.
+
+## Fronteiras de segurança
+
+- Senhas de contas do X nunca entram neste módulo.
+- Senhas locais são derivadas; não há mecanismo de recuperação neste marco.
+- Tokens opacos aparecem somente na resposta de criação/login e no header do cliente.
+- E-mails são normalizados para minúsculas antes da persistência.
+- Consultas de recursos de workspace usam workspaceId e userId/membership.
+- Toda mutação administrativa relevante gera audit_event.

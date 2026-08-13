@@ -1,0 +1,33 @@
+{
+  "name": "nexoflux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fundação do SaaS NexoFlux para automação autorizada no X.",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --sort build",
+    "db:migrate": "pnpm --filter @nexoflux/api db:migrate",
+    "dev": "pnpm --filter @nexoflux/contracts build && pnpm --parallel --filter './apps/*' dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "pnpm --filter @nexoflux/contracts build && vitest run",
+    "typecheck": "pnpm -r --sort typecheck",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "smoke:auth": "pnpm --filter @nexoflux/api smoke:auth",
+    "verify:integration": "pnpm --filter @nexoflux/api verify:integration"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.2.0",
+    "eslint": "10.8.1",
+    "globals": "17.11.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0",
+    "vitest": "4.1.10"
+  }
+}

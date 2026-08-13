@@ -10,6 +10,7 @@ Data da execução documentada: 13 de agosto de 2026.
 - Saúde: degradação quando uma dependência falha.
 - Worker: idempotência e limites já cobertos pela baseline anterior.
 - Simulação web: seed versionado, isolamento de dados por conta, regras de papéis, restauração do estado e sessão exclusiva do navegador.
+- Agenda operacional simulada: criação, execução local, cancelamento, logs e controle de acesso por papel.
 
 ## Comandos obrigatórios
 
@@ -28,7 +29,7 @@ pnpm build
 | Prettier                  | Aprovado; todos os arquivos aderentes                         |
 | ESLint                    | Aprovado; zero erros e zero avisos                            |
 | TypeScript                | Aprovado nos contratos, API, web e worker                     |
-| Vitest                    | Aprovado; 9 arquivos e 25 testes                              |
+| Vitest                    | Aprovado; 9 arquivos e 28 testes                              |
 | Build                     | Aprovado nos contratos, API, web e worker                     |
 | Rotas da simulação web    | Aprovadas; /, /entrar, /criar-conta e /app retornaram 200     |
 | API compilada             | Inicialização aprovada                                        |

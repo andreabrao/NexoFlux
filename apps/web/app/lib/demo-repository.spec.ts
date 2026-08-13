@@ -25,6 +25,8 @@ class MemoryStorage implements StorageLike {
 
 const OWNER_EMAIL = "ana.owner@nexoflux.demo";
 const ADMIN_EMAIL = "bruno.admin@nexoflux.demo";
+const OPERATOR_EMAIL = "carla.operator@nexoflux.demo";
+const VIEWER_EMAIL = "diego.viewer@nexoflux.demo";
 
 function authenticate(repository: ReturnType<typeof createDemoRepository>) {
   return repository.authenticate(OWNER_EMAIL, DEMO_PASSWORD);
@@ -103,5 +105,60 @@ describe("demo repository", () => {
 
     repository.reset();
     expect(repository.listWorkspaces(owner.user.id)).toHaveLength(1);
+  });
+
+  it("creates and runs an allowed task with an auditable simulated result", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const operator = repository.authenticate(OPERATOR_EMAIL, DEMO_PASSWORD);
+
+    const task = repository.createTask(operator.user.id, {
+      content: "Publicar atualização da demonstração.",
+      scheduledAt: "2026-08-14T14:00:00.000Z",
+      workspaceId: owner.workspace.id,
+    });
+    repository.runTask(operator.user.id, owner.workspace.id, task.id);
+
+    const executedTask = repository
+      .listTasks(owner.workspace.id, owner.user.id)
+      .find((candidate) => candidate.id === task.id);
+    expect(executedTask?.status).toBe("SUCCEEDED");
+    expect(executedTask?.events.map((event) => event.status)).toEqual([
+      "SUCCEEDED",
+      "RUNNING",
+      "SCHEDULED",
+    ]);
+  });
+
+  it("allows Viewer to inspect tasks but not create or execute them", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const viewer = repository.authenticate(VIEWER_EMAIL, DEMO_PASSWORD);
+
+    expect(
+      repository.listTasks(owner.workspace.id, viewer.user.id),
+    ).toHaveLength(1);
+    expect(() =>
+      repository.createTask(viewer.user.id, {
+        content: "Esta tarefa não deve ser criada.",
+        scheduledAt: "2026-08-14T14:00:00.000Z",
+        workspaceId: owner.workspace.id,
+      }),
+    ).toThrow("visualizar tarefas");
+  });
+
+  it("cancels an scheduled task and prevents it from running afterwards", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const task = repository.createTask(owner.user.id, {
+      content: "Cancelar antes da execução.",
+      scheduledAt: "2026-08-14T14:00:00.000Z",
+      workspaceId: owner.workspace.id,
+    });
+
+    repository.cancelTask(owner.user.id, owner.workspace.id, task.id);
+    expect(() =>
+      repository.runTask(owner.user.id, owner.workspace.id, task.id),
+    ).toThrow("Somente tarefas agendadas");
   });
 });

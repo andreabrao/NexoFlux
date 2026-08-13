@@ -7,6 +7,7 @@ Este diretório é a fonte de verdade técnica do projeto. Toda mudança de comp
 - [Marco 02 — Identidade, workspaces e RBAC](./marco-02-identidade-workspaces-rbac.md): escopo, critérios de aceite, implementação e rastreabilidade.
 - [Marco 02.1 — Validação de integração](./marco-02-1-validacao-integracao.md): preflight, smoke HTTP, limpeza e resultado do ambiente.
 - [Marco 03 — Simulação web autenticada](./marco-03-simulacao-web.md): contas locais, workspaces, membros, RBAC e limites da demonstração.
+- [Marco 04 — Agenda operacional simulada](./marco-04-agenda-operacional-simulada.md): tarefas permitidas, agenda, logs e adaptador X local.
 - [Publicação no GitHub Pages](./publicacao-github-pages.md): build estático, URL pública e operação do deploy.
 - [Arquitetura](./arquitetura.md): componentes, limites, fluxos e decisões estruturais.
 - [Modelo de dados](./modelo-de-dados.md): tabelas, relacionamentos, constraints e invariantes.

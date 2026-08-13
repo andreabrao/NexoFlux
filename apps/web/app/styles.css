@@ -1010,6 +1010,181 @@ code {
   padding: clamp(1.25rem, 3vw, 2.2rem);
 }
 
+.taskArea {
+  background: #f4f8f6;
+  border: 1px solid #d7e3dc;
+  border-radius: 1rem;
+  margin: 0 0 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.taskForm {
+  align-items: end;
+  border-bottom: 1px solid #d7e3dc;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: minmax(15rem, 1.7fr) minmax(10rem, 0.8fr) auto;
+  margin: 1.5rem 0;
+  padding-bottom: 1.5rem;
+}
+
+.taskForm label {
+  color: var(--ink);
+  display: grid;
+  font-size: 0.76rem;
+  font-weight: 760;
+  gap: 0.45rem;
+}
+
+.taskForm textarea {
+  min-height: 5.2rem;
+  resize: vertical;
+}
+
+.taskForm small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.taskForm .primaryButton {
+  min-height: 2.7rem;
+  white-space: nowrap;
+}
+
+.taskList {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.taskCard {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.taskCardHeader,
+.taskMeta,
+.taskActions {
+  align-items: center;
+  display: flex;
+  gap: 0.7rem;
+  justify-content: space-between;
+}
+
+.taskCardHeader time,
+.taskMeta {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.taskCard > p {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0.9rem 0;
+}
+
+.taskStatus {
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.5rem;
+}
+
+.statusSCHEDULED {
+  background: #e7f0ff;
+  color: #245da7;
+}
+
+.statusSUCCEEDED {
+  background: var(--green-soft);
+  color: #17683e;
+}
+
+.statusCANCELED,
+.statusFAILED {
+  background: var(--red-soft);
+  color: #b33636;
+}
+
+.statusRUNNING {
+  background: #fff0cf;
+  color: #885100;
+}
+
+.taskEvents {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0.9rem 0 0;
+}
+
+.taskEvents li {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.eventDot {
+  background: #9cafaa;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 0.45rem;
+  margin-top: 0.28rem;
+  width: 0.45rem;
+}
+
+.eventSUCCEEDED {
+  background: var(--green);
+}
+
+.eventCANCELED,
+.eventFAILED {
+  background: var(--red);
+}
+
+.eventRUNNING {
+  background: var(--amber);
+}
+
+.taskEvents strong {
+  font-size: 0.67rem;
+  letter-spacing: 0.04em;
+}
+
+.taskEvents p {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  margin: 0.12rem 0 0;
+}
+
+.taskActions {
+  border-top: 1px solid var(--line);
+  justify-content: flex-start;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+}
+
+.secondaryButton {
+  background: white;
+  border: 1px solid #9eb4a8;
+  border-radius: 0.5rem;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 760;
+  padding: 0.55rem 0.7rem;
+}
+
+.secondaryButton:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
 .sectionHeading {
   display: flex;
   justify-content: space-between;
@@ -1311,6 +1486,20 @@ code {
 
   .inviteForm {
     grid-template-columns: 1fr;
+  }
+
+  .taskForm {
+    grid-template-columns: 1fr;
+  }
+
+  .taskForm .primaryButton {
+    width: 100%;
+  }
+
+  .taskMeta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   .memberArea {

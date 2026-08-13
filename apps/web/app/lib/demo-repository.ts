@@ -1,4 +1,6 @@
-import type { WorkspaceRole } from "@nexoflux/contracts";
+import type { TaskStatus, WorkspaceRole } from "@nexoflux/contracts";
+
+import { executeMockXTask } from "./demo-x-adapter";
 
 export const DEMO_PASSWORD = "NexoFlux-demo-2026!";
 
@@ -50,8 +52,29 @@ export type DemoMember = {
   workspaceId: string;
 };
 
+export type DemoTask = {
+  content: string;
+  createdAt: string;
+  createdByUserId: string;
+  id: string;
+  scheduledAt: string;
+  status: TaskStatus;
+  workspaceId: string;
+};
+
+export type DemoTaskEvent = {
+  createdAt: string;
+  detail: string;
+  id: string;
+  status: TaskStatus;
+  taskId: string;
+  workspaceId: string;
+};
+
 export type DemoStore = {
   members: DemoMember[];
+  taskEvents: DemoTaskEvent[];
+  tasks: DemoTask[];
   users: DemoUser[];
   workspaces: DemoWorkspace[];
 };
@@ -73,6 +96,11 @@ export type DemoWorkspaceMember = {
   name: string;
   role: WorkspaceRole;
   userId: string;
+};
+
+export type DemoWorkspaceTask = DemoTask & {
+  createdByName: string;
+  events: DemoTaskEvent[];
 };
 
 export type DemoAuthResult = {
@@ -115,6 +143,36 @@ const seedStore: DemoStore = {
       createdAt: CREATED_AT,
       role: "VIEWER",
       userId: "d5abe1ef-9263-4f5a-8990-707d93708004",
+      workspaceId: WORKSPACE_ID,
+    },
+  ],
+  taskEvents: [
+    {
+      createdAt: "2026-08-13T12:34:00.000Z",
+      detail: "A tarefa foi concluída pelo adaptador simulado do X.",
+      id: "f7b1a55a-4235-42b1-84a1-789b9d801001",
+      status: "SUCCEEDED",
+      taskId: "7b9c46e9-2453-4b92-81cd-19a9d0239001",
+      workspaceId: WORKSPACE_ID,
+    },
+    {
+      createdAt: "2026-08-13T12:30:00.000Z",
+      detail: "Tarefa criada na agenda local.",
+      id: "e6a1b44a-3124-41a0-73a0-678a8c701001",
+      status: "SCHEDULED",
+      taskId: "7b9c46e9-2453-4b92-81cd-19a9d0239001",
+      workspaceId: WORKSPACE_ID,
+    },
+  ],
+  tasks: [
+    {
+      content:
+        "A operação organizada começa com uma agenda clara. #NexoFluxDemo",
+      createdAt: "2026-08-13T12:30:00.000Z",
+      createdByUserId: "cd0f67a6-a3a9-4e0d-a52f-f3d959f54003",
+      id: "7b9c46e9-2453-4b92-81cd-19a9d0239001",
+      scheduledAt: "2026-08-13T12:30:00.000Z",
+      status: "SUCCEEDED",
       workspaceId: WORKSPACE_ID,
     },
   ],
@@ -236,6 +294,36 @@ export function createDemoRepository(storage: StorageLike) {
   const canManageMembers = (role: WorkspaceRole): boolean =>
     role === "OWNER" || role === "ADMIN";
 
+  const canOperateTasks = (role: WorkspaceRole): boolean =>
+    role === "OWNER" || role === "ADMIN" || role === "OPERATOR";
+
+  const addTaskEvent = (
+    store: DemoStore,
+    task: DemoTask,
+    status: TaskStatus,
+    detail: string,
+  ): DemoTaskEvent => {
+    const event: DemoTaskEvent = {
+      createdAt: new Date().toISOString(),
+      detail,
+      id: newId(),
+      status,
+      taskId: task.id,
+      workspaceId: task.workspaceId,
+    };
+    store.taskEvents.push(event);
+    return event;
+  };
+
+  const taskView = (store: DemoStore, task: DemoTask): DemoWorkspaceTask => ({
+    ...task,
+    createdByName: requireUser(store, task.createdByUserId).name,
+    events: store.taskEvents
+      .filter((event) => event.taskId === task.id)
+      .reverse()
+      .sort((first, second) => second.createdAt.localeCompare(first.createdAt)),
+  });
+
   const listWorkspaces = (userId: string): DemoWorkspaceSummary[] => {
     const store = read();
 
@@ -257,6 +345,76 @@ export function createDemoRepository(storage: StorageLike) {
   };
 
   return {
+    cancelTask(actorUserId: string, workspaceId: string, taskId: string): void {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (!canOperateTasks(membership.role)) {
+        throw new DemoRepositoryError(
+          "Sua função permite visualizar tarefas, mas não cancelá-las.",
+        );
+      }
+
+      const task = store.tasks.find(
+        (candidate) =>
+          candidate.id === taskId && candidate.workspaceId === workspaceId,
+      );
+      if (!task) {
+        throw new DemoRepositoryError("Tarefa não encontrada na agenda.");
+      }
+      if (task.status !== "SCHEDULED") {
+        throw new DemoRepositoryError(
+          "Somente tarefas agendadas podem ser canceladas.",
+        );
+      }
+
+      task.status = "CANCELED";
+      addTaskEvent(store, task, "CANCELED", "Tarefa cancelada no simulador.");
+      write(store);
+    },
+
+    createTask(
+      actorUserId: string,
+      input: { content: string; scheduledAt: string; workspaceId: string },
+    ): DemoWorkspaceTask {
+      const store = read();
+      const membership = requireMembership(
+        store,
+        input.workspaceId,
+        actorUserId,
+      );
+      if (!canOperateTasks(membership.role)) {
+        throw new DemoRepositoryError(
+          "Sua função permite visualizar tarefas, mas não criá-las.",
+        );
+      }
+
+      const content = input.content.trim();
+      if (content.length < 3 || content.length > 280) {
+        throw new DemoRepositoryError(
+          "A tarefa deve ter entre 3 e 280 caracteres.",
+        );
+      }
+      const scheduledAt = new Date(input.scheduledAt);
+      if (Number.isNaN(scheduledAt.getTime())) {
+        throw new DemoRepositoryError("Informe uma data e hora válidas.");
+      }
+
+      const task: DemoTask = {
+        content,
+        createdAt: new Date().toISOString(),
+        createdByUserId: actorUserId,
+        id: newId(),
+        scheduledAt: scheduledAt.toISOString(),
+        status: "SCHEDULED",
+        workspaceId: input.workspaceId,
+      };
+      store.tasks.push(task);
+      addTaskEvent(store, task, "SCHEDULED", "Tarefa criada na agenda local.");
+      write(store);
+
+      return taskView(store, task);
+    },
+
     addMember(
       actorUserId: string,
       input: { email: string; role: WorkspaceRole; workspaceId: string },
@@ -366,6 +524,25 @@ export function createDemoRepository(storage: StorageLike) {
 
     getUser(userId: string): DemoUserProfile {
       return removePassword(requireUser(read(), userId));
+    },
+
+    listTasks(workspaceId: string, actorUserId: string): DemoWorkspaceTask[] {
+      const store = read();
+      requireMembership(store, workspaceId, actorUserId);
+
+      return store.tasks
+        .filter((task) => task.workspaceId === workspaceId)
+        .map((task) => taskView(store, task))
+        .sort((first, second) => {
+          const activeFirst =
+            first.status === "SCHEDULED" || first.status === "RUNNING";
+          const activeSecond =
+            second.status === "SCHEDULED" || second.status === "RUNNING";
+          if (activeFirst !== activeSecond) {
+            return activeFirst ? -1 : 1;
+          }
+          return first.scheduledAt.localeCompare(second.scheduledAt);
+        });
     },
 
     listMembers(
@@ -492,6 +669,40 @@ export function createDemoRepository(storage: StorageLike) {
         (member) =>
           member.workspaceId !== workspaceId || member.userId !== targetUserId,
       );
+      write(store);
+    },
+
+    runTask(actorUserId: string, workspaceId: string, taskId: string): void {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (!canOperateTasks(membership.role)) {
+        throw new DemoRepositoryError(
+          "Sua função permite visualizar tarefas, mas não executá-las.",
+        );
+      }
+      const task = store.tasks.find(
+        (candidate) =>
+          candidate.id === taskId && candidate.workspaceId === workspaceId,
+      );
+      if (!task) {
+        throw new DemoRepositoryError("Tarefa não encontrada na agenda.");
+      }
+      if (task.status !== "SCHEDULED") {
+        throw new DemoRepositoryError(
+          "Somente tarefas agendadas podem ser executadas.",
+        );
+      }
+
+      task.status = "RUNNING";
+      addTaskEvent(
+        store,
+        task,
+        "RUNNING",
+        "Execução iniciada pelo adaptador simulado.",
+      );
+      const execution = executeMockXTask(task);
+      task.status = "SUCCEEDED";
+      addTaskEvent(store, task, "SUCCEEDED", execution.message);
       write(store);
     },
 

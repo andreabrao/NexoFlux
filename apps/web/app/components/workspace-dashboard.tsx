@@ -9,6 +9,7 @@ import type { WorkspaceRole } from "@nexoflux/contracts";
 import {
   createDemoRepository,
   type DemoSession,
+  type DemoWorkspaceTask,
   type DemoUserProfile,
   type DemoWorkspaceMember,
   type DemoWorkspaceSummary,
@@ -21,6 +22,7 @@ const roles: WorkspaceRole[] = ["OWNER", "ADMIN", "OPERATOR", "VIEWER"];
 type DashboardData = {
   members: DemoWorkspaceMember[];
   selectedWorkspaceId: string;
+  tasks: DemoWorkspaceTask[];
   user: DemoUserProfile;
   workspaces: DemoWorkspaceSummary[];
 };
@@ -42,6 +44,8 @@ export function WorkspaceDashboard() {
   const [workspaceName, setWorkspaceName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [memberRole, setMemberRole] = useState<WorkspaceRole>("VIEWER");
+  const [taskContent, setTaskContent] = useState("");
+  const [taskSchedule, setTaskSchedule] = useState("");
 
   const refreshDashboard = (
     activeSession: DemoSession,
@@ -66,6 +70,7 @@ export function WorkspaceDashboard() {
         activeSession.userId,
       ),
       selectedWorkspaceId: selectedWorkspace.id,
+      tasks: repository.listTasks(selectedWorkspace.id, activeSession.userId),
       user,
       workspaces,
     });
@@ -196,6 +201,50 @@ export function WorkspaceDashboard() {
     }, "Pessoa removida do workspace.");
   };
 
+  const createTask = (event: FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    if (!taskContent.trim() || !taskSchedule) {
+      return;
+    }
+
+    updateDashboard((activeSession, selectedWorkspaceId) => {
+      createDemoRepository(window.localStorage).createTask(
+        activeSession.userId,
+        {
+          content: taskContent,
+          scheduledAt: new Date(taskSchedule).toISOString(),
+          workspaceId: selectedWorkspaceId,
+        },
+      );
+      setTaskContent("");
+      setTaskSchedule("");
+    }, "Tarefa adicionada à agenda local.");
+  };
+
+  const runTask = (taskId: string): void => {
+    updateDashboard((activeSession, selectedWorkspaceId) => {
+      createDemoRepository(window.localStorage).runTask(
+        activeSession.userId,
+        selectedWorkspaceId,
+        taskId,
+      );
+    }, "Tarefa executada pelo adaptador simulado.");
+  };
+
+  const cancelTask = (taskId: string): void => {
+    if (!window.confirm("Cancelar esta tarefa agendada?")) {
+      return;
+    }
+
+    updateDashboard((activeSession, selectedWorkspaceId) => {
+      createDemoRepository(window.localStorage).cancelTask(
+        activeSession.userId,
+        selectedWorkspaceId,
+        taskId,
+      );
+    }, "Tarefa cancelada.");
+  };
+
   const logout = (): void => {
     clearDemoSession(window.sessionStorage);
     router.push("/entrar");
@@ -264,6 +313,13 @@ export function WorkspaceDashboard() {
   const canInvite =
     selectedWorkspace.role === "OWNER" || selectedWorkspace.role === "ADMIN";
   const canChangeRoles = selectedWorkspace.role === "OWNER";
+  const canOperateTasks =
+    selectedWorkspace.role === "OWNER" ||
+    selectedWorkspace.role === "ADMIN" ||
+    selectedWorkspace.role === "OPERATOR";
+  const scheduledTasks = dashboard.tasks.filter(
+    (task) => task.status === "SCHEDULED",
+  );
 
   return (
     <main className="appShell">
@@ -391,11 +447,115 @@ export function WorkspaceDashboard() {
             <p>controle definido pelo workspace</p>
           </article>
           <article>
-            <span>Dados</span>
-            <strong>Local</strong>
-            <p>sem banco de dados ou servidor</p>
+            <span>Agenda</span>
+            <strong>{scheduledTasks.length}</strong>
+            <p>tarefas aguardando execução</p>
           </article>
         </div>
+
+        <section className="taskArea">
+          <div className="sectionHeading">
+            <div>
+              <p className="eyebrow">Marco 04 · Operação</p>
+              <h2>Agenda de tarefas permitidas</h2>
+              <p>
+                A execução usa um adaptador local do X. Nenhuma conta, token ou
+                publicação real é utilizada nesta demonstração.
+              </p>
+            </div>
+          </div>
+
+          {canOperateTasks ? (
+            <form className="taskForm" onSubmit={createTask}>
+              <label>
+                Conteúdo da tarefa
+                <textarea
+                  maxLength={280}
+                  onChange={(event) => setTaskContent(event.target.value)}
+                  placeholder="Escreva uma atualização de demonstração…"
+                  required
+                  value={taskContent}
+                />
+                <small>{taskContent.length}/280 caracteres</small>
+              </label>
+              <label>
+                Agendar para
+                <input
+                  onChange={(event) => setTaskSchedule(event.target.value)}
+                  required
+                  type="datetime-local"
+                  value={taskSchedule}
+                />
+              </label>
+              <button className="primaryButton" disabled={isBusy} type="submit">
+                Agendar tarefa
+              </button>
+            </form>
+          ) : (
+            <p className="readOnlyNotice">
+              Sua função pode acompanhar a agenda e os logs, mas não criar,
+              executar ou cancelar tarefas.
+            </p>
+          )}
+
+          <div className="taskList" role="list" aria-label="Tarefas da agenda">
+            {dashboard.tasks.map((task) => {
+              const canActOnTask =
+                canOperateTasks && task.status === "SCHEDULED";
+              return (
+                <article className="taskCard" key={task.id}>
+                  <div className="taskCardHeader">
+                    <strong className={"taskStatus status" + task.status}>
+                      {task.status}
+                    </strong>
+                    <time dateTime={task.scheduledAt}>
+                      {new Intl.DateTimeFormat("pt-BR", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(task.scheduledAt))}
+                    </time>
+                  </div>
+                  <p>{task.content}</p>
+                  <div className="taskMeta">
+                    <span>Criada por {task.createdByName}</span>
+                    <span>{task.events.length} eventos no log</span>
+                  </div>
+                  <ol className="taskEvents">
+                    {task.events.map((taskEvent) => (
+                      <li key={taskEvent.id}>
+                        <span className={"eventDot event" + taskEvent.status} />
+                        <div>
+                          <strong>{taskEvent.status}</strong>
+                          <p>{taskEvent.detail}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                  {canActOnTask ? (
+                    <div className="taskActions">
+                      <button
+                        className="secondaryButton"
+                        disabled={isBusy}
+                        onClick={() => runTask(task.id)}
+                        type="button"
+                      >
+                        Executar simulação
+                      </button>
+                      <button
+                        className="dangerButton"
+                        disabled={isBusy}
+                        onClick={() => cancelTask(task.id)}
+                        type="button"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        </section>
 
         <section className="memberArea">
           <div className="sectionHeading">

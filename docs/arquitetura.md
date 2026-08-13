@@ -25,6 +25,15 @@ tem seed versionado no código e grava as alterações em \`localStorage\`; a se
 da aba usa \`sessionStorage\`. Esse modo reproduz as regras de RBAC para
 apresentação, mas não substitui a autorização da API em uma implantação real.
 
+### Agenda operacional do Marco 4
+
+As tarefas demonstrativas e seus eventos ficam no mesmo repositório local do
+navegador. A fronteira do provedor externo é
+apps/web/app/lib/demo-x-adapter.ts; no Marco 4 ela apenas confirma uma
+execução simulada. A implementação não acessa a API do X, OAuth, proxy ou
+segredos. Quando a integração real for iniciada, este adaptador será substituído
+sem acoplar o dashboard ao SDK do provedor.
+
 ## Componentes
 
 ### packages/contracts

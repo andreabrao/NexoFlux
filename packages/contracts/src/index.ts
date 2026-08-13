@@ -69,6 +69,16 @@ export const taskTypeSchema = z.enum(["PUBLISH_POST", "SYNC_METRICS"]);
 
 export type TaskType = z.infer<typeof taskTypeSchema>;
 
+export const taskStatusSchema = z.enum([
+  "SCHEDULED",
+  "RUNNING",
+  "SUCCEEDED",
+  "FAILED",
+  "CANCELED",
+]);
+
+export type TaskStatus = z.infer<typeof taskStatusSchema>;
+
 export const taskPayloadSchema = z.object({
   accountId: z.string().uuid(),
   id: z.string().uuid(),

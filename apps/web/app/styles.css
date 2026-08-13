@@ -1268,6 +1268,154 @@ code {
   overflow-wrap: anywhere;
 }
 
+.adminArea {
+  background: #fbfaf8;
+  border: 1px solid #e3ded4;
+  border-radius: 1rem;
+  margin: 0 0 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.adminStats {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 1.4rem 0;
+}
+
+.adminStats article {
+  background: white;
+  border: 1px solid #e3ded4;
+  border-radius: 0.7rem;
+  padding: 0.85rem;
+}
+
+.adminStats span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 720;
+  text-transform: uppercase;
+}
+
+.adminStats strong {
+  display: block;
+  font-size: 1.45rem;
+  letter-spacing: -0.04em;
+  margin-top: 0.35rem;
+}
+
+.adminSearch {
+  color: var(--ink);
+  display: grid;
+  font-size: 0.76rem;
+  font-weight: 760;
+  gap: 0.4rem;
+}
+
+.adminGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  margin-top: 1rem;
+}
+
+.adminTable,
+.auditTrail {
+  background: white;
+  border: 1px solid #e3ded4;
+  border-radius: 0.75rem;
+  padding: 0.95rem;
+}
+
+.adminTable h3,
+.auditTrail h3 {
+  font-size: 0.82rem;
+  margin: 0 0 0.75rem;
+}
+
+.adminTable article {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: minmax(8rem, 1fr) auto auto auto;
+  padding: 0.7rem 0;
+}
+
+.adminTable article:first-of-type {
+  border-top: 0;
+}
+
+.adminTable article > div {
+  min-width: 0;
+}
+
+.adminTable article > div strong,
+.adminTable article > div small {
+  display: block;
+}
+
+.adminTable article > div strong {
+  font-size: 0.77rem;
+}
+
+.adminTable article > div small,
+.adminTable article > span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+
+.adminTable article > .billingStatus {
+  font-size: 0.58rem;
+}
+
+.adminTable:nth-child(2) article {
+  display: block;
+}
+
+.emptyAdminState {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin: 0.8rem 0 0;
+}
+
+.auditTrail {
+  margin-top: 1rem;
+}
+
+.auditTrail ol {
+  display: grid;
+  gap: 0.7rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.auditTrail li {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.auditTrail strong {
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+}
+
+.auditTrail p {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.4;
+  margin: 0.12rem 0;
+}
+
+.auditTrail small {
+  color: var(--muted);
+  font-size: 0.67rem;
+}
+
 .taskForm {
   align-items: end;
   border-bottom: 1px solid #d7e3dc;
@@ -1752,6 +1900,15 @@ code {
 
   .billingSummary {
     grid-template-columns: 1fr;
+  }
+
+  .adminStats,
+  .adminGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminTable article {
+    grid-template-columns: minmax(7rem, 1fr) auto;
   }
 
   .taskForm .primaryButton {

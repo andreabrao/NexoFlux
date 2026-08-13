@@ -50,6 +50,14 @@ e o repositório aplica o status antes de liberar uma execução. Em produção,
 webhook será recebido e validado pela API, que manterá o registro financeiro e
 de consumo no servidor.
 
+### Administração do Marco 7
+
+O painel administrativo demonstrativo obtém uma visão agregada do repositório
+local apenas quando o usuário possui o papel Owner. A trilha de auditoria é
+gerada pelas mutações administrativas e operacionais no mesmo armazenamento.
+Em produção, consultas administrativas, auditoria imutável, busca e retenção
+serão operações exclusivas da API, com uma permissão de plataforma dedicada.
+
 ## Componentes
 
 ### packages/contracts

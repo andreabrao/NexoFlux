@@ -9,6 +9,7 @@ import type { WorkspaceRole } from "@nexoflux/contracts";
 import {
   createDemoRepository,
   demoPlans,
+  type DemoAdminOverview,
   type DemoBillingOverview,
   type DemoConsumption,
   type DemoPlan,
@@ -24,6 +25,7 @@ import { clearDemoSession, readDemoSession } from "../lib/demo-session";
 const roles: WorkspaceRole[] = ["OWNER", "ADMIN", "OPERATOR", "VIEWER"];
 
 type DashboardData = {
+  admin: DemoAdminOverview | null;
   billing: DemoBillingOverview;
   consumption: DemoConsumption;
   members: DemoWorkspaceMember[];
@@ -52,6 +54,7 @@ export function WorkspaceDashboard() {
   const [memberRole, setMemberRole] = useState<WorkspaceRole>("VIEWER");
   const [taskContent, setTaskContent] = useState("");
   const [taskSchedule, setTaskSchedule] = useState("");
+  const [adminSearch, setAdminSearch] = useState("");
 
   const refreshDashboard = (
     activeSession: DemoSession,
@@ -70,7 +73,12 @@ export function WorkspaceDashboard() {
       );
     }
 
+    const admin = workspaces.some((workspace) => workspace.role === "OWNER")
+      ? repository.getAdminOverview(activeSession.userId)
+      : null;
+
     setDashboard({
+      admin,
       billing: repository.getBilling(
         selectedWorkspace.id,
         activeSession.userId,
@@ -362,6 +370,26 @@ export function WorkspaceDashboard() {
   const scheduledTasks = dashboard.tasks.filter(
     (task) => task.status === "SCHEDULED",
   );
+  const adminQuery = adminSearch.trim().toLocaleLowerCase("pt-BR");
+  const adminWorkspaces =
+    dashboard.admin?.workspaces.filter((workspace) =>
+      [
+        workspace.name,
+        workspace.slug,
+        workspace.plan,
+        workspace.subscriptionStatus,
+      ]
+        .join(" ")
+        .toLocaleLowerCase("pt-BR")
+        .includes(adminQuery),
+    ) ?? [];
+  const adminUsers =
+    dashboard.admin?.users.filter((user) =>
+      [user.name, user.email]
+        .join(" ")
+        .toLocaleLowerCase("pt-BR")
+        .includes(adminQuery),
+    ) ?? [];
 
   return (
     <main className="appShell">
@@ -680,6 +708,111 @@ export function WorkspaceDashboard() {
             ))}
           </ol>
         </section>
+
+        {dashboard.admin ? (
+          <section className="adminArea">
+            <div className="sectionHeading">
+              <div>
+                <p className="eyebrow">Marco 07 · Administração</p>
+                <h2>Visão central da demonstração</h2>
+                <p>
+                  Consulte usuários, workspaces, planos, assinaturas e ações
+                  sensíveis registradas neste navegador.
+                </p>
+              </div>
+            </div>
+            <div className="adminStats">
+              <article>
+                <span>Usuários locais</span>
+                <strong>{dashboard.admin.totalUsers}</strong>
+              </article>
+              <article>
+                <span>Workspaces locais</span>
+                <strong>{dashboard.admin.totalWorkspaces}</strong>
+              </article>
+              <article>
+                <span>Eventos auditados</span>
+                <strong>{dashboard.admin.auditEvents.length}</strong>
+              </article>
+            </div>
+            <label className="adminSearch">
+              Pesquisar administração
+              <input
+                onChange={(event) => setAdminSearch(event.target.value)}
+                placeholder="Nome, e-mail, workspace, plano ou status"
+                type="search"
+                value={adminSearch}
+              />
+            </label>
+            <div className="adminGrid">
+              <div className="adminTable">
+                <h3>Workspaces e assinaturas</h3>
+                {adminWorkspaces.map((workspace) => (
+                  <article key={workspace.workspaceId}>
+                    <div>
+                      <strong>{workspace.name}</strong>
+                      <small>{workspace.slug}</small>
+                    </div>
+                    <span>{workspace.memberCount} pessoas</span>
+                    <span>{demoPlans[workspace.plan].label}</span>
+                    <strong
+                      className={
+                        "billingStatus billing" + workspace.subscriptionStatus
+                      }
+                    >
+                      {workspace.subscriptionStatus}
+                    </strong>
+                  </article>
+                ))}
+                {adminWorkspaces.length === 0 ? (
+                  <p className="emptyAdminState">
+                    Nenhum workspace encontrado.
+                  </p>
+                ) : null}
+              </div>
+              <div className="adminTable">
+                <h3>Usuários</h3>
+                {adminUsers.map((user) => (
+                  <article key={user.id}>
+                    <div>
+                      <strong>{user.name}</strong>
+                      <small>{user.email}</small>
+                    </div>
+                  </article>
+                ))}
+                {adminUsers.length === 0 ? (
+                  <p className="emptyAdminState">Nenhum usuário encontrado.</p>
+                ) : null}
+              </div>
+            </div>
+            <div className="auditTrail">
+              <h3>Trilha de auditoria</h3>
+              <ol>
+                {dashboard.admin.auditEvents.slice(0, 8).map((event) => (
+                  <li key={event.id}>
+                    <span className="eventDot" />
+                    <div>
+                      <strong>{event.action}</strong>
+                      <p>{event.detail}</p>
+                      <small>
+                        {event.actorName} ·{" "}
+                        {new Intl.DateTimeFormat("pt-BR", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        }).format(new Date(event.createdAt))}
+                      </small>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <p className="planDisclaimer">
+              Esta é uma visão local de administração. Não representa acesso de
+              suporte, dados de clientes reais ou uma permissão global de
+              produção.
+            </p>
+          </section>
+        ) : null}
 
         <section className="taskArea">
           <div className="sectionHeading">

@@ -266,4 +266,26 @@ describe("demo repository", () => {
       ),
     ).toThrow("Somente Owners");
   });
+
+  it("exposes administration only to an Owner and records sensitive actions", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const admin = repository.authenticate(ADMIN_EMAIL, DEMO_PASSWORD);
+
+    repository.createTask(owner.user.id, {
+      content: "Registrar uma ação auditável.",
+      scheduledAt: "2026-08-14T14:00:00.000Z",
+      workspaceId: owner.workspace.id,
+    });
+    const overview = repository.getAdminOverview(owner.user.id);
+
+    expect(overview.totalUsers).toBe(4);
+    expect(overview.totalWorkspaces).toBe(1);
+    expect(
+      overview.auditEvents.some((event) => event.action === "TASK_SCHEDULED"),
+    ).toBe(true);
+    expect(() => repository.getAdminOverview(admin.user.id)).toThrow(
+      "Somente Owners",
+    );
+  });
 });

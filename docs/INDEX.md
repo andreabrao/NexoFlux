@@ -10,6 +10,7 @@ Este diretório é a fonte de verdade técnica do projeto. Toda mudança de comp
 - [Marco 04 — Agenda operacional simulada](./marco-04-agenda-operacional-simulada.md): tarefas permitidas, agenda, logs e adaptador X local.
 - [Marco 05 — Planos e consumo simulados](./marco-05-planos-consumo-simulado.md): cotas por plano, bloqueio e upgrade local.
 - [Marco 06 — Cobrança sandbox simulada](./marco-06-cobranca-sandbox-simulada.md): assinatura, eventos e reconciliação local.
+- [Marco 07 — Administração simulada](./marco-07-administracao-simulada.md): consultas locais, pesquisa e trilha de auditoria.
 - [Publicação no GitHub Pages](./publicacao-github-pages.md): build estático, URL pública e operação do deploy.
 - [Arquitetura](./arquitetura.md): componentes, limites, fluxos e decisões estruturais.
 - [Modelo de dados](./modelo-de-dados.md): tabelas, relacionamentos, constraints e invariantes.

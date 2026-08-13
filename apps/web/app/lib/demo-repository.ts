@@ -114,6 +114,17 @@ export type DemoBillingEvent = {
   workspaceId: string;
 };
 
+export type DemoAuditEvent = {
+  action: string;
+  actorName: string;
+  actorUserId: string;
+  createdAt: string;
+  detail: string;
+  id: string;
+  target: string;
+  workspaceId: string;
+};
+
 export type DemoMember = {
   createdAt: string;
   role: WorkspaceRole;
@@ -141,6 +152,7 @@ export type DemoTaskEvent = {
 };
 
 export type DemoStore = {
+  auditEvents: DemoAuditEvent[];
   billingEvents: DemoBillingEvent[];
   members: DemoMember[];
   subscriptions: DemoSubscription[];
@@ -179,6 +191,24 @@ export type DemoBillingOverview = {
   subscription: DemoSubscription;
 };
 
+export type DemoAdminWorkspace = {
+  memberCount: number;
+  name: string;
+  plan: DemoPlan;
+  slug: string;
+  subscriptionStatus: DemoBillingStatus;
+  workspaceId: string;
+};
+
+export type DemoAdminOverview = {
+  auditEvents: DemoAuditEvent[];
+  subscriptions: DemoSubscription[];
+  totalUsers: number;
+  totalWorkspaces: number;
+  users: DemoUserProfile[];
+  workspaces: DemoAdminWorkspace[];
+};
+
 export type DemoAuthResult = {
   session: DemoSession;
   user: DemoUserProfile;
@@ -196,6 +226,18 @@ const WORKSPACE_ID = "e2fcb9d1-83ce-4e5d-bd4c-11c7af1a5001";
 const CREATED_AT = "2026-08-13T12:00:00.000Z";
 
 const seedStore: DemoStore = {
+  auditEvents: [
+    {
+      action: "WORKSPACE_CREATED",
+      actorName: "Ana Martins",
+      actorUserId: "a32d281c-320f-4a5b-9063-7f3bf4ec1001",
+      createdAt: CREATED_AT,
+      detail: "Workspace inicial criado para a demonstração.",
+      id: "aa0c1001-1001-4001-8001-000000000001",
+      target: "NexoFlux Operações",
+      workspaceId: WORKSPACE_ID,
+    },
+  ],
   billingEvents: [
     {
       createdAt: "2026-08-13T12:00:00.000Z",
@@ -359,6 +401,7 @@ export function createDemoRepository(storage: StorageLike) {
       const stored = JSON.parse(rawStore) as Partial<DemoStore>;
       const store: DemoStore = {
         ...stored,
+        auditEvents: stored.auditEvents ?? [],
         billingEvents: stored.billingEvents ?? [],
         subscriptions: stored.subscriptions ?? [],
         taskEvents: stored.taskEvents ?? [],
@@ -537,6 +580,31 @@ export function createDemoRepository(storage: StorageLike) {
     return event;
   };
 
+  const recordAuditEvent = (
+    store: DemoStore,
+    input: {
+      action: string;
+      actorUserId: string;
+      detail: string;
+      target: string;
+      workspaceId: string;
+    },
+  ): DemoAuditEvent => {
+    const actor = requireUser(store, input.actorUserId);
+    const event: DemoAuditEvent = {
+      action: input.action,
+      actorName: actor.name,
+      actorUserId: actor.id,
+      createdAt: new Date().toISOString(),
+      detail: input.detail,
+      id: newId(),
+      target: input.target,
+      workspaceId: input.workspaceId,
+    };
+    store.auditEvents.push(event);
+    return event;
+  };
+
   const listWorkspaces = (userId: string): DemoWorkspaceSummary[] => {
     const store = read();
 
@@ -582,6 +650,13 @@ export function createDemoRepository(storage: StorageLike) {
 
       task.status = "CANCELED";
       addTaskEvent(store, task, "CANCELED", "Tarefa cancelada no simulador.");
+      recordAuditEvent(store, {
+        action: "TASK_CANCELED",
+        actorUserId,
+        detail: "Tarefa cancelada antes da execução.",
+        target: task.content,
+        workspaceId,
+      });
       write(store);
     },
 
@@ -623,6 +698,13 @@ export function createDemoRepository(storage: StorageLike) {
       };
       store.tasks.push(task);
       addTaskEvent(store, task, "SCHEDULED", "Tarefa criada na agenda local.");
+      recordAuditEvent(store, {
+        action: "TASK_SCHEDULED",
+        actorUserId,
+        detail: "Tarefa adicionada à agenda local.",
+        target: task.content,
+        workspaceId: input.workspaceId,
+      });
       write(store);
 
       return taskView(store, task);
@@ -656,6 +738,13 @@ export function createDemoRepository(storage: StorageLike) {
           demoPlans[plan].label +
           " e reconciliado no adaptador Stripe simulado.",
         kind: "PAYMENT_SUCCEEDED",
+      });
+      recordAuditEvent(store, {
+        action: "PLAN_CHANGED",
+        actorUserId,
+        detail: "Plano alterado para " + demoPlans[plan].label + ".",
+        target: workspace.name,
+        workspaceId,
       });
       write(store);
       return { ...workspace, role: membership.role };
@@ -710,6 +799,13 @@ export function createDemoRepository(storage: StorageLike) {
         workspaceId: input.workspaceId,
       };
       store.members.push(member);
+      recordAuditEvent(store, {
+        action: "MEMBER_ADDED",
+        actorUserId,
+        detail: "Membro adicionado com a função " + member.role + ".",
+        target: target.name,
+        workspaceId: input.workspaceId,
+      });
       write(store);
 
       return {
@@ -764,6 +860,13 @@ export function createDemoRepository(storage: StorageLike) {
         userId,
         workspaceId: workspace.id,
       });
+      recordAuditEvent(store, {
+        action: "WORKSPACE_CREATED",
+        actorUserId: userId,
+        detail: "Novo workspace criado com plano Starter.",
+        target: workspace.name,
+        workspaceId: workspace.id,
+      });
       write(store);
 
       return { ...workspace, role: "OWNER" };
@@ -791,6 +894,48 @@ export function createDemoRepository(storage: StorageLike) {
             second.createdAt.localeCompare(first.createdAt),
           ),
         subscription: { ...subscription },
+      };
+    },
+
+    getAdminOverview(actorUserId: string): DemoAdminOverview {
+      const store = read();
+      const ownerMembership = store.members.find(
+        (member) => member.userId === actorUserId && member.role === "OWNER",
+      );
+      if (!ownerMembership) {
+        throw new DemoRepositoryError(
+          "Somente Owners podem consultar a administração simulada.",
+        );
+      }
+
+      return {
+        auditEvents: [...store.auditEvents].sort((first, second) =>
+          second.createdAt.localeCompare(first.createdAt),
+        ),
+        subscriptions: [...store.subscriptions].sort((first, second) =>
+          second.updatedAt.localeCompare(first.updatedAt),
+        ),
+        totalUsers: store.users.length,
+        totalWorkspaces: store.workspaces.length,
+        users: store.users
+          .map(removePassword)
+          .sort((first, second) =>
+            first.name.localeCompare(second.name, "pt-BR"),
+          ),
+        workspaces: store.workspaces
+          .map((workspace) => ({
+            memberCount: store.members.filter(
+              (member) => member.workspaceId === workspace.id,
+            ).length,
+            name: workspace.name,
+            plan: workspace.plan,
+            slug: workspace.slug,
+            subscriptionStatus: requireSubscription(store, workspace.id).status,
+            workspaceId: workspace.id,
+          }))
+          .sort((first, second) =>
+            first.name.localeCompare(second.name, "pt-BR"),
+          ),
       };
     },
 
@@ -883,6 +1028,13 @@ export function createDemoRepository(storage: StorageLike) {
         userId: user.id,
         workspaceId: workspace.id,
       });
+      recordAuditEvent(store, {
+        action: "WORKSPACE_REGISTERED",
+        actorUserId: user.id,
+        detail: "Conta local registrada com workspace Starter.",
+        target: workspace.name,
+        workspaceId: workspace.id,
+      });
       write(store);
 
       return {
@@ -938,6 +1090,13 @@ export function createDemoRepository(storage: StorageLike) {
         (member) =>
           member.workspaceId !== workspaceId || member.userId !== targetUserId,
       );
+      recordAuditEvent(store, {
+        action: "MEMBER_REMOVED",
+        actorUserId,
+        detail: "Membro removido do workspace.",
+        target: requireUser(store, targetUserId).name,
+        workspaceId,
+      });
       write(store);
     },
 
@@ -984,6 +1143,13 @@ export function createDemoRepository(storage: StorageLike) {
       const execution = executeMockXTask(task);
       task.status = "SUCCEEDED";
       addTaskEvent(store, task, "SUCCEEDED", execution.message);
+      recordAuditEvent(store, {
+        action: "TASK_EXECUTED",
+        actorUserId,
+        detail: "Tarefa concluída pelo adaptador local do X.",
+        target: task.content,
+        workspaceId,
+      });
       write(store);
     },
 
@@ -1011,6 +1177,13 @@ export function createDemoRepository(storage: StorageLike) {
       recordBillingEvent(store, subscription, {
         detail: details[kind],
         kind,
+      });
+      recordAuditEvent(store, {
+        action: "BILLING_WEBHOOK_SIMULATED",
+        actorUserId,
+        detail: "Evento de cobrança " + kind + " reconciliado localmente.",
+        target: subscription.id,
+        workspaceId,
       });
       write(store);
 
@@ -1063,6 +1236,13 @@ export function createDemoRepository(storage: StorageLike) {
       }
 
       targetMembership.role = role;
+      recordAuditEvent(store, {
+        action: "MEMBER_ROLE_UPDATED",
+        actorUserId,
+        detail: "Função atualizada para " + role + ".",
+        target: requireUser(store, targetUserId).name,
+        workspaceId,
+      });
       write(store);
       const user = requireUser(store, targetUserId);
 

@@ -15,6 +15,7 @@ Fundação técnica do MVP fictício da NexoFlux: uma plataforma multi-tenant pa
 - Marco 08: prontidão de integrações simulada, com estados explícitos, flag local do adaptador X e auditoria.
 - Marco 09: correções de homologação para agenda, recuperação local, páginas públicas, pluralização e transparência de datas.
 - Marco 10: início de UX/UI e arquitetura, com perfil local auditável e uma fronteira preparada para API futura.
+- Marco 11: início da Fundação da Plataforma, com configurações de workspace protegidas por Owner e auditadas.
 - Próximos marcos: integração da interface com a API, integrações autorizadas com o X e observabilidade de produção.
 
 A documentação completa está em [docs/INDEX.md](./docs/INDEX.md). Código, testes e documentação fazem parte do mesmo critério de conclusão.
@@ -71,6 +72,7 @@ O atalho pnpm check executa toda a sequência acima, exceto formatação com esc
 - [Marco 08 — Prontidão de integrações simulada](./docs/marco-08-prontidao-integracoes-simulada.md)
 - [Marco 09 — Correções de homologação](./docs/marco-09-correcao-homologacao.md)
 - [Marco 10 — UX/UI e arquitetura inicial](./docs/marco-10-ux-ui-arquitetura.md)
+- [Marco 11 — Fundação da Plataforma](./docs/marco-11-fundacao-plataforma.md)
 - [Publicação no GitHub Pages](./docs/publicacao-github-pages.md)
 - [Arquitetura](./docs/arquitetura.md)
 - [Modelo de dados](./docs/modelo-de-dados.md)

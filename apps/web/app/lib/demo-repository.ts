@@ -1355,6 +1355,44 @@ export function createDemoRepository(storage: StorageLike) {
       return removePassword(user);
     },
 
+    updateWorkspaceName(
+      actorUserId: string,
+      workspaceId: string,
+      name: string,
+    ): DemoWorkspaceSummary {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (membership.role !== "OWNER") {
+        throw new DemoRepositoryError(
+          "Somente Owners podem atualizar a identificação do workspace.",
+        );
+      }
+      const workspace = store.workspaces.find(
+        (candidate) => candidate.id === workspaceId,
+      );
+      if (!workspace) {
+        throw new DemoRepositoryError("Workspace não encontrado no simulador.");
+      }
+      const normalizedName = name.trim();
+      if (normalizedName.length < 2 || normalizedName.length > 80) {
+        throw new DemoRepositoryError(
+          "O nome do workspace deve ter entre 2 e 80 caracteres.",
+        );
+      }
+
+      const previousName = workspace.name;
+      workspace.name = normalizedName;
+      recordAuditEvent(store, {
+        action: "WORKSPACE_NAME_UPDATED",
+        actorUserId,
+        detail: "Nome do workspace atualizado de '" + previousName + "'.",
+        target: workspace.name,
+        workspaceId,
+      });
+      write(store);
+      return { ...workspace, role: membership.role };
+    },
+
     updateMemberRole(
       actorUserId: string,
       workspaceId: string,

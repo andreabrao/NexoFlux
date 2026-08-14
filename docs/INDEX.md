@@ -14,6 +14,7 @@ Este diretório é a fonte de verdade técnica do projeto. Toda mudança de comp
 - [Marco 08 — Prontidão de integrações simulada](./marco-08-prontidao-integracoes-simulada.md): feature flag local, estados e fronteiras de integração.
 - [Marco 09 — Correções de homologação](./marco-09-correcao-homologacao.md): correções do relatório, critérios de reteste e dependências externas.
 - [Marco 10 — UX/UI e arquitetura inicial](./marco-10-ux-ui-arquitetura.md): perfil local, fronteiras de componente e evolução autorizada.
+- [Marco 11 — Fundação da Plataforma](./marco-11-fundacao-plataforma.md): configurações de workspace, Owner, slug estável e auditoria.
 - [Publicação no GitHub Pages](./publicacao-github-pages.md): build estático, URL pública e operação do deploy.
 - [Arquitetura](./arquitetura.md): componentes, limites, fluxos e decisões estruturais.
 - [Modelo de dados](./modelo-de-dados.md): tabelas, relacionamentos, constraints e invariantes.

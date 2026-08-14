@@ -100,6 +100,33 @@ describe("demo repository", () => {
     ).toBe(true);
   });
 
+  it("lets only Owner update the local workspace identification", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const admin = repository.authenticate(ADMIN_EMAIL, DEMO_PASSWORD);
+
+    expect(() =>
+      repository.updateWorkspaceName(
+        admin.user.id,
+        owner.workspace.id,
+        "Operação Administrativa",
+      ),
+    ).toThrow("Somente Owners");
+
+    const updatedWorkspace = repository.updateWorkspaceName(
+      owner.user.id,
+      owner.workspace.id,
+      "NexoFlux Fundação",
+    );
+    expect(updatedWorkspace.name).toBe("NexoFlux Fundação");
+    expect(updatedWorkspace.slug).toBe(owner.workspace.slug);
+    expect(
+      repository
+        .getAdminOverview(owner.user.id)
+        .auditEvents.some((event) => event.action === "WORKSPACE_NAME_UPDATED"),
+    ).toBe(true);
+  });
+
   it("blocks an Admin from adding an Owner", () => {
     const repository = createDemoRepository(new MemoryStorage());
     const owner = authenticate(repository);

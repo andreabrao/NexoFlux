@@ -75,6 +75,14 @@ aceita mudança de e-mail, senha ou identidade externa. Essa separação preserv
 uma troca futura do repositório local pela API sem acoplar a tela à persistência
 de produção.
 
+### Configurações de workspace do Marco 11
+
+A identificação do workspace é alterada por uma rota específica que delega a
+validação de Owner ao repositório. O slug fica estável para representar a futura
+chave pública do workspace, enquanto o nome é uma propriedade de apresentação.
+Essa decisão evita que uma atualização visual quebre referências antes da API
+assumir o controle transacional em produção.
+
 ## Componentes
 
 ### packages/contracts

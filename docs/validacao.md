@@ -17,6 +17,7 @@ Data da execução documentada: 13 de agosto de 2026.
 - Prontidão de integrações simulada: estados explícitos, controle exclusivo de Owner, auditoria e bloqueio do adaptador local do X.
 - Correções de homologação: agendamento com retorno, recuperação local, rotas públicas, pluralização e transparência de horário.
 - UX/UI e arquitetura inicial: perfil local, validação de nome e auditoria da alteração.
+- Fundação da Plataforma: configuração de workspace, Owner obrigatório, slug estável e auditoria.
 
 ## Comandos obrigatórios
 
@@ -35,7 +36,7 @@ pnpm build
 | Prettier                  | Aprovado; todos os arquivos aderentes                         |
 | ESLint                    | Aprovado; zero erros e zero avisos                            |
 | TypeScript                | Aprovado nos contratos, API, web e worker                     |
-| Vitest                    | Aprovado; 9 arquivos e 37 testes                              |
+| Vitest                    | Aprovado; 9 arquivos e 38 testes                              |
 | Build                     | Aprovado nos contratos, API, web e worker                     |
 | Rotas da simulação web    | Aprovadas; /, /entrar, /criar-conta e /app retornaram 200     |
 | API compilada             | Inicialização aprovada                                        |

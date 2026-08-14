@@ -1328,6 +1328,33 @@ export function createDemoRepository(storage: StorageLike) {
       storage.removeItem(STORE_KEY);
     },
 
+    updateProfile(userId: string, input: { name: string }): DemoUserProfile {
+      const store = read();
+      const user = requireUser(store, userId);
+      const name = input.name.trim();
+      if (name.length < 2 || name.length > 80) {
+        throw new DemoRepositoryError(
+          "O nome exibido deve ter entre 2 e 80 caracteres.",
+        );
+      }
+
+      user.name = name;
+      const membership = store.members.find(
+        (candidate) => candidate.userId === userId,
+      );
+      if (membership) {
+        recordAuditEvent(store, {
+          action: "PROFILE_UPDATED_LOCAL",
+          actorUserId: userId,
+          detail: "Nome de perfil atualizado na demonstração local.",
+          target: user.email,
+          workspaceId: membership.workspaceId,
+        });
+      }
+      write(store);
+      return removePassword(user);
+    },
+
     updateMemberRole(
       actorUserId: string,
       workspaceId: string,

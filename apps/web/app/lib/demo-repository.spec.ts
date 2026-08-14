@@ -83,6 +83,23 @@ describe("demo repository", () => {
     ).toBe(true);
   });
 
+  it("updates the local display name and records the profile change", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+
+    const profile = repository.updateProfile(owner.user.id, {
+      name: "Ana Martins Revisão",
+    });
+
+    expect(profile.name).toBe("Ana Martins Revisão");
+    expect(repository.getUser(owner.user.id).name).toBe("Ana Martins Revisão");
+    expect(
+      repository
+        .getAdminOverview(owner.user.id)
+        .auditEvents.some((event) => event.action === "PROFILE_UPDATED_LOCAL"),
+    ).toBe(true);
+  });
+
   it("blocks an Admin from adding an Owner", () => {
     const repository = createDemoRepository(new MemoryStorage());
     const owner = authenticate(repository);

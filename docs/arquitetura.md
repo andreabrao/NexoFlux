@@ -67,6 +67,14 @@ desativada. Ela não contém segredos nem aciona provedores externos. No modo de
 produção, essa configuração deverá ser aplicada no servidor, por workspace,
 com autorização de plataforma e trilha imutável.
 
+### Perfil local do Marco 10
+
+A rota de perfil mantém a interação de UX/UI em um componente próprio. Ela lê
+a sessão local, delega a alteração de nome ao repositório de demonstração e não
+aceita mudança de e-mail, senha ou identidade externa. Essa separação preserva
+uma troca futura do repositório local pela API sem acoplar a tela à persistência
+de produção.
+
 ## Componentes
 
 ### packages/contracts

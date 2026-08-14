@@ -483,6 +483,9 @@ export function WorkspaceDashboard() {
               <small>{dashboard.user.email}</small>
             </div>
           </div>
+          <Link className="textButton" href="/perfil">
+            Perfil
+          </Link>
           <button className="textButton" onClick={logout} type="button">
             Sair
           </button>

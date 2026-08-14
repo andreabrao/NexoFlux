@@ -232,6 +232,8 @@ export function WorkspaceDashboard() {
   const createTask = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     if (!taskContent.trim() || !taskSchedule) {
+      setError("Informe o conteúdo e a data da tarefa para agendar.");
+      setNotice("");
       return;
     }
 
@@ -240,7 +242,7 @@ export function WorkspaceDashboard() {
         activeSession.userId,
         {
           content: taskContent,
-          scheduledAt: new Date(taskSchedule).toISOString(),
+          scheduledAt: taskSchedule,
           workspaceId: selectedWorkspaceId,
         },
       );
@@ -510,6 +512,7 @@ export function WorkspaceDashboard() {
               As ações abaixo existem somente neste navegador. As regras de
               permissão reproduzem a API do projeto.
             </p>
+            <p>Horários e eventos usam a data e hora deste navegador.</p>
           </div>
           <button onClick={resetSimulation} type="button">
             Restaurar dados
@@ -775,7 +778,10 @@ export function WorkspaceDashboard() {
                       <strong>{workspace.name}</strong>
                       <small>{workspace.slug}</small>
                     </div>
-                    <span>{workspace.memberCount} pessoas</span>
+                    <span>
+                      {workspace.memberCount}{" "}
+                      {workspace.memberCount === 1 ? "pessoa" : "pessoas"}
+                    </span>
                     <span>{demoPlans[workspace.plan].label}</span>
                     <strong
                       className={

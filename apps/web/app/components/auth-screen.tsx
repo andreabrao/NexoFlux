@@ -12,7 +12,7 @@ import {
 } from "../lib/demo-repository";
 import { writeDemoSession } from "../lib/demo-session";
 
-type AuthMode = "login" | "register";
+type AuthMode = "login" | "register" | "recovery";
 
 type AuthScreenProps = {
   mode: AuthMode;
@@ -23,24 +23,43 @@ export function AuthScreen({ mode }: AuthScreenProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [workspaceName, setWorkspaceName] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isLogin = mode === "login";
+  const isRecovery = mode === "recovery";
 
   const chooseDemoAccount = (account: (typeof demoAccounts)[number]): void => {
     setEmail(account.email);
     setPassword(DEMO_PASSWORD);
     setError("");
+    setNotice("");
   };
 
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     setError("");
+    setNotice("");
     setIsSubmitting(true);
 
     try {
       const repository = createDemoRepository(window.localStorage);
+      if (isRecovery) {
+        if (password !== passwordConfirmation) {
+          throw new DemoRepositoryError("As senhas informadas não coincidem.");
+        }
+
+        repository.recoverPassword(email, password);
+        setPassword("");
+        setPasswordConfirmation("");
+        setNotice(
+          "Senha local redefinida. Entre com a nova senha nesta demonstração.",
+        );
+        setIsSubmitting(false);
+        return;
+      }
       const result = isLogin
         ? repository.authenticate(email, password)
         : repository.register({
@@ -72,8 +91,12 @@ export function AuthScreen({ mode }: AuthScreenProps) {
           <span>NexoFlux</span>
         </Link>
         <div className="authIntroCopy">
-          <p className="eyebrow">Marco 03 · Simulação navegável</p>
-          <h1>Experimente a operação antes de conectar serviços reais.</h1>
+          <p className="eyebrow">Simulação navegável</p>
+          <h1>
+            {isRecovery
+              ? "Recupere o acesso local à demonstração."
+              : "Experimente a operação antes de conectar serviços reais."}
+          </h1>
           <p>
             Contas, workspaces e permissões são simulados nesta demonstração.
             Nenhum dado é enviado a um servidor.
@@ -90,17 +113,31 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
       <section className="authPanel" aria-label="Acesso ao simulador">
         <div className="authPanelHeading">
-          <p className="eyebrow">{isLogin ? "Acessar" : "Criar conta"}</p>
-          <h2>{isLogin ? "Entre no simulador" : "Comece uma nova operação"}</h2>
+          <p className="eyebrow">
+            {isRecovery
+              ? "Recuperar acesso"
+              : isLogin
+                ? "Acessar"
+                : "Criar conta"}
+          </p>
+          <h2>
+            {isRecovery
+              ? "Redefinir senha local"
+              : isLogin
+                ? "Entre no simulador"
+                : "Comece uma nova operação"}
+          </h2>
           <p>
-            {isLogin
-              ? "Use uma conta demonstrativa ou suas próprias credenciais locais."
-              : "Sua conta e seu primeiro workspace existirão apenas nesta demonstração."}
+            {isRecovery
+              ? "Este fluxo não envia e-mail nem altera contas externas. Ele só atualiza os dados deste navegador."
+              : isLogin
+                ? "Use uma conta demonstrativa ou suas próprias credenciais locais."
+                : "Sua conta e seu primeiro workspace existirão apenas nesta demonstração."}
           </p>
         </div>
 
         <form className="authForm" onSubmit={submit}>
-          {!isLogin ? (
+          {!isLogin && !isRecovery ? (
             <>
               <label>
                 Seu nome
@@ -146,10 +183,30 @@ export function AuthScreen({ mode }: AuthScreenProps) {
               value={password}
             />
           </label>
+          {isRecovery ? (
+            <label>
+              Confirmar nova senha
+              <input
+                autoComplete="new-password"
+                minLength={12}
+                onChange={(event) =>
+                  setPasswordConfirmation(event.target.value)
+                }
+                required
+                type="password"
+                value={passwordConfirmation}
+              />
+            </label>
+          ) : null}
 
           {error ? (
             <p className="formError" role="alert">
               {error}
+            </p>
+          ) : null}
+          {notice ? (
+            <p className="successMessage" role="status">
+              {notice}
             </p>
           ) : null}
 
@@ -159,10 +216,12 @@ export function AuthScreen({ mode }: AuthScreenProps) {
             type="submit"
           >
             {isSubmitting
-              ? "Abrindo…"
-              : isLogin
-                ? "Entrar no workspace"
-                : "Criar workspace"}
+              ? "Processando…"
+              : isRecovery
+                ? "Redefinir senha local"
+                : isLogin
+                  ? "Entrar no workspace"
+                  : "Criar workspace"}
           </button>
         </form>
 
@@ -190,11 +249,20 @@ export function AuthScreen({ mode }: AuthScreenProps) {
         ) : null}
 
         <p className="authSwitch">
-          {isLogin ? "Ainda não tem uma conta local?" : "Já criou uma conta?"}{" "}
+          {isRecovery
+            ? "Já lembra sua senha local?"
+            : isLogin
+              ? "Ainda não tem uma conta local?"
+              : "Já criou uma conta?"}{" "}
           <Link href={isLogin ? "/criar-conta" : "/entrar"}>
             {isLogin ? "Criar workspace" : "Entrar"}
           </Link>
         </p>
+        {isLogin ? (
+          <p className="authSwitch authRecoveryLink">
+            <Link href="/recuperar-senha">Esqueci minha senha local</Link>
+          </p>
+        ) : null}
       </section>
     </main>
   );

@@ -64,6 +64,25 @@ describe("demo repository", () => {
     ).not.toThrow();
   });
 
+  it("redefines a local password and records the recovery in the audit trail", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const newPassword = "Nova-senha-local-2026!";
+
+    repository.recoverPassword(OWNER_EMAIL, newPassword);
+
+    expect(() => repository.authenticate(OWNER_EMAIL, DEMO_PASSWORD)).toThrow(
+      "E-mail ou senha inválidos",
+    );
+    const owner = repository.authenticate(OWNER_EMAIL, newPassword);
+    expect(
+      repository
+        .getAdminOverview(owner.user.id)
+        .auditEvents.some(
+          (event) => event.action === "PASSWORD_RECOVERED_LOCAL",
+        ),
+    ).toBe(true);
+  });
+
   it("blocks an Admin from adding an Owner", () => {
     const repository = createDemoRepository(new MemoryStorage());
     const owner = authenticate(repository);
@@ -128,6 +147,22 @@ describe("demo repository", () => {
       "RUNNING",
       "SCHEDULED",
     ]);
+  });
+
+  it("accepts the raw datetime-local value used by the scheduling form", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+
+    const task = repository.createTask(owner.user.id, {
+      content: "Agendamento vindo do formulário local.",
+      scheduledAt: "2026-09-03T10:00",
+      workspaceId: owner.workspace.id,
+    });
+
+    expect(task.status).toBe("SCHEDULED");
+    expect(
+      repository.listTasks(owner.workspace.id, owner.user.id),
+    ).toContainEqual(expect.objectContaining({ id: task.id }));
   });
 
   it("allows Viewer to inspect tasks but not create or execute them", () => {

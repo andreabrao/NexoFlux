@@ -13,6 +13,7 @@ Fundação técnica do MVP fictício da NexoFlux: uma plataforma multi-tenant pa
 - Marco 06: cobrança sandbox simulada, com assinatura, eventos e reconciliação local.
 - Marco 07: administração simulada de usuários, workspaces, assinaturas e auditoria.
 - Marco 08: prontidão de integrações simulada, com estados explícitos, flag local do adaptador X e auditoria.
+- Marco 09: correções de homologação para agenda, recuperação local, páginas públicas, pluralização e transparência de datas.
 - Próximos marcos: integração da interface com a API, integrações autorizadas com o X e observabilidade de produção.
 
 A documentação completa está em [docs/INDEX.md](./docs/INDEX.md). Código, testes e documentação fazem parte do mesmo critério de conclusão.
@@ -67,6 +68,7 @@ O atalho pnpm check executa toda a sequência acima, exceto formatação com esc
 - [Marco 06 — Cobrança sandbox simulada](./docs/marco-06-cobranca-sandbox-simulada.md)
 - [Marco 07 — Administração simulada](./docs/marco-07-administracao-simulada.md)
 - [Marco 08 — Prontidão de integrações simulada](./docs/marco-08-prontidao-integracoes-simulada.md)
+- [Marco 09 — Correções de homologação](./docs/marco-09-correcao-homologacao.md)
 - [Publicação no GitHub Pages](./docs/publicacao-github-pages.md)
 - [Arquitetura](./docs/arquitetura.md)
 - [Modelo de dados](./docs/modelo-de-dados.md)

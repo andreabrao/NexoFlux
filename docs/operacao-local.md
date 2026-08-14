@@ -45,7 +45,7 @@ demonstração fica exclusivamente no navegador:
 
 - localStorage guarda contas, workspaces e memberships simulados;
 - sessionStorage guarda a sessão da aba atual;
-- o botão **Restaurar demonstração** apaga as alterações locais e recria o seed
+- o botão **Restaurar dados** apaga as alterações locais e recria o seed
   versionado no repositório.
 
 Não há sincronização dessa simulação com GitHub, API ou banco de dados. GitHub

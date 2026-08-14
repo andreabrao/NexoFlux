@@ -20,6 +20,7 @@ execução.
 - Alteração de função exclusiva para Owner.
 - Remoção de membro para Owner/Admin, com as restrições do RBAC.
 - Restauração dos dados iniciais por um botão explícito.
+- Recuperação de senha exclusivamente local, sem e-mail ou serviços externos.
 - Layout responsivo para desktop e celular.
 
 ## Fonte dos dados
@@ -63,7 +64,7 @@ conectada, ela continua sendo a fonte de autorização definitiva.
 ## Limites assumidos
 
 - Não há segurança de produção: senhas demonstrativas ficam no código cliente.
-- Não há recuperação de senha, e-mail transacional ou OAuth.
+- Não há e-mail transacional, token de recuperação ou OAuth.
 - Não existe sincronização entre navegadores ou dispositivos.
 - A proteção de rota é de experiência do usuário; uma versão produtiva depende
   da sessão e da autorização no servidor.

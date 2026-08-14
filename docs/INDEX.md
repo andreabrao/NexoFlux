@@ -12,6 +12,7 @@ Este diretório é a fonte de verdade técnica do projeto. Toda mudança de comp
 - [Marco 06 — Cobrança sandbox simulada](./marco-06-cobranca-sandbox-simulada.md): assinatura, eventos e reconciliação local.
 - [Marco 07 — Administração simulada](./marco-07-administracao-simulada.md): consultas locais, pesquisa e trilha de auditoria.
 - [Marco 08 — Prontidão de integrações simulada](./marco-08-prontidao-integracoes-simulada.md): feature flag local, estados e fronteiras de integração.
+- [Marco 09 — Correções de homologação](./marco-09-correcao-homologacao.md): correções do relatório, critérios de reteste e dependências externas.
 - [Publicação no GitHub Pages](./publicacao-github-pages.md): build estático, URL pública e operação do deploy.
 - [Arquitetura](./arquitetura.md): componentes, limites, fluxos e decisões estruturais.
 - [Modelo de dados](./modelo-de-dados.md): tabelas, relacionamentos, constraints e invariantes.

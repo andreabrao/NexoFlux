@@ -15,6 +15,7 @@ Data da execução documentada: 13 de agosto de 2026.
 - Cobrança sandbox simulada: assinatura, eventos locais, reconciliação e bloqueio por status não ativo.
 - Administração simulada: consultas exclusivas para Owner, pesquisa e auditoria de ações sensíveis.
 - Prontidão de integrações simulada: estados explícitos, controle exclusivo de Owner, auditoria e bloqueio do adaptador local do X.
+- Correções de homologação: agendamento com retorno, recuperação local, rotas públicas, pluralização e transparência de horário.
 
 ## Comandos obrigatórios
 
@@ -33,7 +34,7 @@ pnpm build
 | Prettier                  | Aprovado; todos os arquivos aderentes                         |
 | ESLint                    | Aprovado; zero erros e zero avisos                            |
 | TypeScript                | Aprovado nos contratos, API, web e worker                     |
-| Vitest                    | Aprovado; 9 arquivos e 34 testes                              |
+| Vitest                    | Aprovado; 9 arquivos e 36 testes                              |
 | Build                     | Aprovado nos contratos, API, web e worker                     |
 | Rotas da simulação web    | Aprovadas; /, /entrar, /criar-conta e /app retornaram 200     |
 | API compilada             | Inicialização aprovada                                        |
@@ -70,6 +71,6 @@ O comportamento e as limitações do modo demonstrativo estão detalhados em
 
 - Falta teste de integração SQL contra a versão real do PostgreSQL.
 - Falta rate limiting nos endpoints de autenticação.
-- Falta verificação de e-mail, recuperação de senha e rotação administrativa de sessões.
+- Falta verificação de e-mail, recuperação de senha segura por token e rotação administrativa de sessões.
 - A interface autenticada é uma simulação local; a integração dela com a API e
   com persistência real permanece fora do escopo deste marco.

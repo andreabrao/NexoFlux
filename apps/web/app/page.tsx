@@ -31,6 +31,12 @@ export default function Home() {
         </Link>
         <div className="navActions">
           <span className="environment">Simulação local</span>
+          <Link className="navLink" href="/funcionalidades">
+            Funcionalidades
+          </Link>
+          <Link className="navLink" href="/planos">
+            Planos
+          </Link>
           <Link className="navLink" href="/entrar">
             Entrar
           </Link>

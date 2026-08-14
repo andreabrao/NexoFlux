@@ -895,6 +895,38 @@ export function createDemoRepository(storage: StorageLike) {
       return { ...workspace, role: "OWNER" };
     },
 
+    recoverPassword(email: string, password: string): void {
+      const store = read();
+      const user = store.users.find(
+        (candidate) =>
+          candidate.email.toLowerCase() === email.trim().toLowerCase(),
+      );
+      if (!user) {
+        throw new DemoRepositoryError("Conta local não encontrada.");
+      }
+      if (password.length < 12) {
+        throw new DemoRepositoryError(
+          "A nova senha local deve ter ao menos 12 caracteres.",
+        );
+      }
+
+      user.password = password;
+      const membership = store.members.find(
+        (candidate) => candidate.userId === user.id,
+      );
+      if (membership) {
+        recordAuditEvent(store, {
+          action: "PASSWORD_RECOVERED_LOCAL",
+          actorUserId: user.id,
+          detail:
+            "Senha local redefinida pelo fluxo de recuperação da demonstração.",
+          target: user.email,
+          workspaceId: membership.workspaceId,
+        });
+      }
+      write(store);
+    },
+
     getUser(userId: string): DemoUserProfile {
       return removePassword(requireUser(read(), userId));
     },

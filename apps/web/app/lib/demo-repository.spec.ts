@@ -127,6 +127,39 @@ describe("demo repository", () => {
     ).toBe(true);
   });
 
+  it("manages local closed-beta participants only as Owner", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const admin = repository.authenticate(ADMIN_EMAIL, DEMO_PASSWORD);
+
+    expect(() =>
+      repository.inviteBetaParticipant(admin.user.id, {
+        email: "piloto@nexoflux.demo",
+        name: "Pessoa Piloto",
+        workspaceId: owner.workspace.id,
+      }),
+    ).toThrow("Somente Owners");
+
+    const participant = repository.inviteBetaParticipant(owner.user.id, {
+      email: "piloto@nexoflux.demo",
+      name: "Pessoa Piloto",
+      workspaceId: owner.workspace.id,
+    });
+    expect(participant.status).toBe("INVITED");
+    expect(
+      repository.updateBetaParticipantStatus(
+        owner.user.id,
+        owner.workspace.id,
+        participant.id,
+        "ACTIVE",
+      ).status,
+    ).toBe("ACTIVE");
+    expect(
+      repository.getBetaOverview(owner.workspace.id, owner.user.id)
+        .participants,
+    ).toHaveLength(1);
+  });
+
   it("blocks an Admin from adding an Owner", () => {
     const repository = createDemoRepository(new MemoryStorage());
     const owner = authenticate(repository);

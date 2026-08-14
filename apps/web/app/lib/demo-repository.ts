@@ -151,8 +151,25 @@ export type DemoTaskEvent = {
   workspaceId: string;
 };
 
+export type DemoBetaParticipantStatus = "INVITED" | "ACTIVE" | "PAUSED";
+
+export type DemoBetaParticipant = {
+  createdAt: string;
+  email: string;
+  id: string;
+  invitedByUserId: string;
+  name: string;
+  status: DemoBetaParticipantStatus;
+  workspaceId: string;
+};
+
+export type DemoBetaOverview = {
+  participants: DemoBetaParticipant[];
+};
+
 export type DemoStore = {
   auditEvents: DemoAuditEvent[];
+  betaParticipants: DemoBetaParticipant[];
   billingEvents: DemoBillingEvent[];
   integrationSettings: DemoIntegrationSettings;
   members: DemoMember[];
@@ -255,6 +272,7 @@ const seedStore: DemoStore = {
       workspaceId: WORKSPACE_ID,
     },
   ],
+  betaParticipants: [],
   billingEvents: [
     {
       createdAt: "2026-08-13T12:00:00.000Z",
@@ -422,6 +440,7 @@ export function createDemoRepository(storage: StorageLike) {
       const store: DemoStore = {
         ...stored,
         auditEvents: stored.auditEvents ?? [],
+        betaParticipants: stored.betaParticipants ?? [],
         billingEvents: stored.billingEvents ?? [],
         integrationSettings: stored.integrationSettings ?? {
           xMockExecutionEnabled: true,
@@ -950,6 +969,117 @@ export function createDemoRepository(storage: StorageLike) {
           ),
         subscription: { ...subscription },
       };
+    },
+
+    getBetaOverview(
+      workspaceId: string,
+      actorUserId: string,
+    ): DemoBetaOverview {
+      const store = read();
+      requireMembership(store, workspaceId, actorUserId);
+      return {
+        participants: store.betaParticipants
+          .filter((participant) => participant.workspaceId === workspaceId)
+          .sort((first, second) =>
+            second.createdAt.localeCompare(first.createdAt),
+          ),
+      };
+    },
+
+    inviteBetaParticipant(
+      actorUserId: string,
+      input: { email: string; name: string; workspaceId: string },
+    ): DemoBetaParticipant {
+      const store = read();
+      const membership = requireMembership(
+        store,
+        input.workspaceId,
+        actorUserId,
+      );
+      if (membership.role !== "OWNER") {
+        throw new DemoRepositoryError(
+          "Somente Owners podem convidar participantes para o beta fechado.",
+        );
+      }
+      const name = input.name.trim();
+      const email = input.email.trim().toLowerCase();
+      if (name.length < 2 || name.length > 80) {
+        throw new DemoRepositoryError(
+          "O nome do participante deve ter entre 2 e 80 caracteres.",
+        );
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        throw new DemoRepositoryError(
+          "Informe um e-mail válido para o piloto.",
+        );
+      }
+      if (
+        store.betaParticipants.some(
+          (participant) =>
+            participant.workspaceId === input.workspaceId &&
+            participant.email === email,
+        )
+      ) {
+        throw new DemoRepositoryError(
+          "Este e-mail já está na lista local do beta fechado.",
+        );
+      }
+
+      const participant: DemoBetaParticipant = {
+        createdAt: new Date().toISOString(),
+        email,
+        id: newId(),
+        invitedByUserId: actorUserId,
+        name,
+        status: "INVITED",
+        workspaceId: input.workspaceId,
+      };
+      store.betaParticipants.push(participant);
+      recordAuditEvent(store, {
+        action: "BETA_PARTICIPANT_INVITED",
+        actorUserId,
+        detail: "Participante incluído na lista local do beta fechado.",
+        target: participant.email,
+        workspaceId: input.workspaceId,
+      });
+      write(store);
+      return { ...participant };
+    },
+
+    updateBetaParticipantStatus(
+      actorUserId: string,
+      workspaceId: string,
+      participantId: string,
+      status: DemoBetaParticipantStatus,
+    ): DemoBetaParticipant {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (membership.role !== "OWNER") {
+        throw new DemoRepositoryError(
+          "Somente Owners podem atualizar participantes do beta fechado.",
+        );
+      }
+      const participant = store.betaParticipants.find(
+        (candidate) =>
+          candidate.id === participantId &&
+          candidate.workspaceId === workspaceId,
+      );
+      if (!participant) {
+        throw new DemoRepositoryError(
+          "Participante não encontrado no beta local.",
+        );
+      }
+
+      participant.status = status;
+      recordAuditEvent(store, {
+        action: "BETA_PARTICIPANT_STATUS_UPDATED",
+        actorUserId,
+        detail: "Status do participante atualizado para " + status + ".",
+        target: participant.email,
+        workspaceId,
+      });
+      write(store);
+      return { ...participant };
     },
 
     getIntegrationReadiness(

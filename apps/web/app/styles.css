@@ -1007,6 +1007,95 @@ code {
   padding-top: 1rem;
 }
 
+.betaPanel {
+  max-width: 44rem;
+}
+
+.betaWorkspaceSelect {
+  color: var(--ink-soft);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 760;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+}
+
+.betaInviteForm {
+  align-items: end;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  margin: 1rem 0;
+}
+
+.betaInviteForm label {
+  color: var(--ink-soft);
+  display: grid;
+  font-size: 0.78rem;
+  font-weight: 760;
+  gap: 0.4rem;
+}
+
+.betaList {
+  border-top: 1px solid var(--line);
+  display: grid;
+  margin-top: 1.25rem;
+}
+
+.betaList article {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+}
+
+.betaList strong,
+.betaList small {
+  display: block;
+}
+
+.betaList strong {
+  font-size: 0.8rem;
+}
+
+.betaList small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin-top: 0.15rem;
+}
+
+.betaList select {
+  font-size: 0.68rem;
+  font-weight: 800;
+  min-height: 2.3rem;
+  width: auto;
+}
+
+.betaStatus {
+  border-radius: 99px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.45rem;
+}
+
+.betaINVITED {
+  background: #fff0ce;
+  color: #8a5600;
+}
+
+.betaACTIVE {
+  background: #dff2eb;
+  color: #126449;
+}
+
+.betaPAUSED {
+  background: #edeff1;
+  color: #4f5b66;
+}
+
 .workspaceMain {
   margin: 0 auto;
   max-width: 76rem;
@@ -2046,6 +2135,14 @@ code {
   .publicPlanGrid {
     grid-template-columns: 1fr;
   }
+
+  .betaInviteForm {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .betaInviteForm .primaryButton {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 620px) {
@@ -2196,5 +2293,14 @@ code {
   .publicNote {
     margin-left: 1.25rem;
     margin-right: 1.25rem;
+  }
+
+  .betaInviteForm {
+    grid-template-columns: 1fr;
+  }
+
+  .betaInviteForm .primaryButton {
+    grid-column: auto;
+    width: 100%;
   }
 }

@@ -83,6 +83,14 @@ chave pública do workspace, enquanto o nome é uma propriedade de apresentaçã
 Essa decisão evita que uma atualização visual quebre referências antes da API
 assumir o controle transacional em produção.
 
+### Beta fechado simulado do Marco 13
+
+Participantes-piloto são registros locais vinculados ao workspace e não à
+autenticação. Owner administra convites e estados, e o repositório produz os
+eventos de auditoria. Em produção, essa fronteira deverá receber convites,
+identidade, expiração e consentimento na API, sem transformar a lista local em
+um mecanismo de acesso real.
+
 ## Componentes
 
 ### packages/contracts

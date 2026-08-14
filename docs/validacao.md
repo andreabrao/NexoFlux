@@ -18,6 +18,7 @@ Data da execução documentada: 13 de agosto de 2026.
 - Correções de homologação: agendamento com retorno, recuperação local, rotas públicas, pluralização e transparência de horário.
 - UX/UI e arquitetura inicial: perfil local, validação de nome e auditoria da alteração.
 - Fundação da Plataforma: configuração de workspace, Owner obrigatório, slug estável e auditoria.
+- Beta fechado simulado: participantes-piloto locais, estados e autorização exclusiva de Owner.
 
 ## Comandos obrigatórios
 
@@ -36,7 +37,7 @@ pnpm build
 | Prettier                  | Aprovado; todos os arquivos aderentes                         |
 | ESLint                    | Aprovado; zero erros e zero avisos                            |
 | TypeScript                | Aprovado nos contratos, API, web e worker                     |
-| Vitest                    | Aprovado; 9 arquivos e 38 testes                              |
+| Vitest                    | Aprovado; 9 arquivos e 39 testes                              |
 | Build                     | Aprovado nos contratos, API, web e worker                     |
 | Rotas da simulação web    | Aprovadas; /, /entrar, /criar-conta e /app retornaram 200     |
 | API compilada             | Inicialização aprovada                                        |

@@ -489,6 +489,9 @@ export function WorkspaceDashboard() {
           <Link className="textButton" href="/configuracoes">
             Configurações
           </Link>
+          <Link className="textButton" href="/beta-fechado">
+            Beta fechado
+          </Link>
           <button className="textButton" onClick={logout} type="button">
             Sair
           </button>

@@ -1416,6 +1416,86 @@ code {
   font-size: 0.67rem;
 }
 
+.integrationArea {
+  background: #f4f8f8;
+  border: 1px solid #d3e1df;
+  border-radius: 1rem;
+  margin: 0 0 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.2rem);
+}
+
+.integrationGrid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1.35rem;
+}
+
+.integrationGrid article {
+  background: white;
+  border: 1px solid #d3e1df;
+  border-radius: 0.7rem;
+  padding: 0.9rem;
+}
+
+.integrationGrid article > div {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+  justify-content: space-between;
+}
+
+.integrationGrid strong {
+  font-size: 0.8rem;
+}
+
+.integrationGrid p,
+.integrationControl p {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  margin: 0.45rem 0 0;
+}
+
+.integrationStatus {
+  border-radius: 99px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.42rem;
+}
+
+.integrationSIMULATED {
+  background: #dff2eb;
+  color: #126449;
+}
+
+.integrationPENDING {
+  background: #fff0ce;
+  color: #8a5600;
+}
+
+.integrationNOT_CONFIGURED,
+.integrationDISABLED {
+  background: #edeff1;
+  color: #4f5b66;
+}
+
+.integrationControl {
+  align-items: center;
+  background: #e7f0ef;
+  border-radius: 0.7rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding: 0.85rem 0.95rem;
+}
+
+.integrationControl strong {
+  font-size: 0.78rem;
+}
+
 .taskForm {
   align-items: end;
   border-bottom: 1px solid #d7e3dc;
@@ -1900,6 +1980,15 @@ code {
 
   .billingSummary {
     grid-template-columns: 1fr;
+  }
+
+  .integrationGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .integrationControl {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .adminStats,

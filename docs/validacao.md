@@ -14,6 +14,7 @@ Data da execução documentada: 13 de agosto de 2026.
 - Planos e consumo simulados: cotas por workspace, troca de plano exclusiva ao Owner e bloqueio por limite.
 - Cobrança sandbox simulada: assinatura, eventos locais, reconciliação e bloqueio por status não ativo.
 - Administração simulada: consultas exclusivas para Owner, pesquisa e auditoria de ações sensíveis.
+- Prontidão de integrações simulada: estados explícitos, controle exclusivo de Owner, auditoria e bloqueio do adaptador local do X.
 
 ## Comandos obrigatórios
 
@@ -32,7 +33,7 @@ pnpm build
 | Prettier                  | Aprovado; todos os arquivos aderentes                         |
 | ESLint                    | Aprovado; zero erros e zero avisos                            |
 | TypeScript                | Aprovado nos contratos, API, web e worker                     |
-| Vitest                    | Aprovado; 9 arquivos e 33 testes                              |
+| Vitest                    | Aprovado; 9 arquivos e 34 testes                              |
 | Build                     | Aprovado nos contratos, API, web e worker                     |
 | Rotas da simulação web    | Aprovadas; /, /entrar, /criar-conta e /app retornaram 200     |
 | API compilada             | Inicialização aprovada                                        |

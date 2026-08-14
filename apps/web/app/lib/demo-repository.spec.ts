@@ -288,4 +288,48 @@ describe("demo repository", () => {
       "Somente Owners",
     );
   });
+
+  it("lets only Owner control the local X adapter and blocks execution when disabled", () => {
+    const repository = createDemoRepository(new MemoryStorage());
+    const owner = authenticate(repository);
+    const admin = repository.authenticate(ADMIN_EMAIL, DEMO_PASSWORD);
+    const task = repository.createTask(owner.user.id, {
+      content: "Confirmar bloqueio do adaptador local.",
+      scheduledAt: "2026-08-14T14:00:00.000Z",
+      workspaceId: owner.workspace.id,
+    });
+
+    expect(
+      repository.getIntegrationReadiness(owner.workspace.id, owner.user.id)
+        .xMockExecutionEnabled,
+    ).toBe(true);
+    expect(() =>
+      repository.setXMockExecutionEnabled(
+        admin.user.id,
+        owner.workspace.id,
+        false,
+      ),
+    ).toThrow("Somente Owners");
+
+    repository.setXMockExecutionEnabled(
+      owner.user.id,
+      owner.workspace.id,
+      false,
+    );
+    expect(() =>
+      repository.runTask(owner.user.id, owner.workspace.id, task.id),
+    ).toThrow("adaptador local do X está desativado");
+    expect(
+      repository
+        .getAdminOverview(owner.user.id)
+        .auditEvents.some((event) => event.action === "X_MOCK_ADAPTER_UPDATED"),
+    ).toBe(true);
+
+    repository.setXMockExecutionEnabled(
+      owner.user.id,
+      owner.workspace.id,
+      true,
+    );
+    repository.runTask(owner.user.id, owner.workspace.id, task.id);
+  });
 });

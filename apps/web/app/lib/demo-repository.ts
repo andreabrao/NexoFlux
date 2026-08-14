@@ -154,6 +154,7 @@ export type DemoTaskEvent = {
 export type DemoStore = {
   auditEvents: DemoAuditEvent[];
   billingEvents: DemoBillingEvent[];
+  integrationSettings: DemoIntegrationSettings;
   members: DemoMember[];
   subscriptions: DemoSubscription[];
   taskEvents: DemoTaskEvent[];
@@ -209,6 +210,22 @@ export type DemoAdminOverview = {
   workspaces: DemoAdminWorkspace[];
 };
 
+export type DemoIntegrationStatus =
+  "SIMULATED" | "PENDING" | "NOT_CONFIGURED" | "DISABLED";
+
+export type DemoIntegrationReadiness = {
+  integrations: Array<{
+    detail: string;
+    name: string;
+    status: DemoIntegrationStatus;
+  }>;
+  xMockExecutionEnabled: boolean;
+};
+
+export type DemoIntegrationSettings = {
+  xMockExecutionEnabled: boolean;
+};
+
 export type DemoAuthResult = {
   session: DemoSession;
   user: DemoUserProfile;
@@ -250,6 +267,9 @@ const seedStore: DemoStore = {
       workspaceId: WORKSPACE_ID,
     },
   ],
+  integrationSettings: {
+    xMockExecutionEnabled: true,
+  },
   members: [
     {
       createdAt: CREATED_AT,
@@ -403,6 +423,9 @@ export function createDemoRepository(storage: StorageLike) {
         ...stored,
         auditEvents: stored.auditEvents ?? [],
         billingEvents: stored.billingEvents ?? [],
+        integrationSettings: stored.integrationSettings ?? {
+          xMockExecutionEnabled: true,
+        },
         subscriptions: stored.subscriptions ?? [],
         taskEvents: stored.taskEvents ?? [],
         tasks: stored.tasks ?? [],
@@ -897,6 +920,47 @@ export function createDemoRepository(storage: StorageLike) {
       };
     },
 
+    getIntegrationReadiness(
+      workspaceId: string,
+      actorUserId: string,
+    ): DemoIntegrationReadiness {
+      const store = read();
+      requireMembership(store, workspaceId, actorUserId);
+      const xMockExecutionEnabled =
+        store.integrationSettings.xMockExecutionEnabled;
+
+      return {
+        integrations: [
+          {
+            detail: xMockExecutionEnabled
+              ? "Adaptador local ativo; nenhuma conta, token ou publicação real é usada."
+              : "Adaptador local desativado por um Owner; execuções simuladas ficam bloqueadas.",
+            name: "Adaptador X",
+            status: xMockExecutionEnabled ? "SIMULATED" : "DISABLED",
+          },
+          {
+            detail:
+              "OAuth, escopos e aprovação da API oficial ainda não foram configurados.",
+            name: "API oficial do X",
+            status: "PENDING",
+          },
+          {
+            detail:
+              "Eventos de cobrança são gerados pelo adaptador sandbox local.",
+            name: "Cobrança",
+            status: "SIMULATED",
+          },
+          {
+            detail:
+              "Sem API, banco de dados ou fila nesta demonstração publicada.",
+            name: "API, banco e fila",
+            status: "NOT_CONFIGURED",
+          },
+        ],
+        xMockExecutionEnabled,
+      };
+    },
+
     getAdminOverview(actorUserId: string): DemoAdminOverview {
       const store = read();
       const ownerMembership = store.members.find(
@@ -1132,6 +1196,11 @@ export function createDemoRepository(storage: StorageLike) {
           "A assinatura não está ativa. Regularize a cobrança simulada antes de executar novas tarefas.",
         );
       }
+      if (!store.integrationSettings.xMockExecutionEnabled) {
+        throw new DemoRepositoryError(
+          "O adaptador local do X está desativado. Um Owner deve reativá-lo para executar tarefas simuladas.",
+        );
+      }
 
       task.status = "RUNNING";
       addTaskEvent(
@@ -1148,6 +1217,32 @@ export function createDemoRepository(storage: StorageLike) {
         actorUserId,
         detail: "Tarefa concluída pelo adaptador local do X.",
         target: task.content,
+        workspaceId,
+      });
+      write(store);
+    },
+
+    setXMockExecutionEnabled(
+      actorUserId: string,
+      workspaceId: string,
+      enabled: boolean,
+    ): void {
+      const store = read();
+      const membership = requireMembership(store, workspaceId, actorUserId);
+      if (membership.role !== "OWNER") {
+        throw new DemoRepositoryError(
+          "Somente Owners podem configurar o adaptador de integração simulado.",
+        );
+      }
+
+      store.integrationSettings.xMockExecutionEnabled = enabled;
+      recordAuditEvent(store, {
+        action: "X_MOCK_ADAPTER_UPDATED",
+        actorUserId,
+        detail: enabled
+          ? "Adaptador local do X reativado para a demonstração."
+          : "Adaptador local do X desativado; novas execuções simuladas foram bloqueadas.",
+        target: "Adaptador X local",
         workspaceId,
       });
       write(store);

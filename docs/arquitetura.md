@@ -58,6 +58,15 @@ gerada pelas mutações administrativas e operacionais no mesmo armazenamento.
 Em produção, consultas administrativas, auditoria imutável, busca e retenção
 serão operações exclusivas da API, com uma permissão de plataforma dedicada.
 
+### Prontidão de integrações do Marco 8
+
+O painel de prontidão lê uma configuração do mesmo repositório local e torna
+visíveis os limites do site estático. A flag do adaptador local do X é alterada
+somente por Owner, é auditada e impede novas execuções simuladas quando
+desativada. Ela não contém segredos nem aciona provedores externos. No modo de
+produção, essa configuração deverá ser aplicada no servidor, por workspace,
+com autorização de plataforma e trilha imutável.
+
 ## Componentes
 
 ### packages/contracts

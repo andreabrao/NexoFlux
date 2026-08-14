@@ -12,6 +12,7 @@ import {
   type DemoAdminOverview,
   type DemoBillingOverview,
   type DemoConsumption,
+  type DemoIntegrationReadiness,
   type DemoPlan,
   type DemoSession,
   type DemoWorkspaceTask,
@@ -28,6 +29,7 @@ type DashboardData = {
   admin: DemoAdminOverview | null;
   billing: DemoBillingOverview;
   consumption: DemoConsumption;
+  integration: DemoIntegrationReadiness;
   members: DemoWorkspaceMember[];
   selectedWorkspaceId: string;
   tasks: DemoWorkspaceTask[];
@@ -84,6 +86,10 @@ export function WorkspaceDashboard() {
         activeSession.userId,
       ),
       consumption: repository.getConsumption(
+        selectedWorkspace.id,
+        activeSession.userId,
+      ),
+      integration: repository.getIntegrationReadiness(
         selectedWorkspace.id,
         activeSession.userId,
       ),
@@ -294,6 +300,21 @@ export function WorkspaceDashboard() {
     }, messages[kind]);
   };
 
+  const setXMockExecutionEnabled = (enabled: boolean): void => {
+    updateDashboard(
+      (activeSession, selectedWorkspaceId) => {
+        createDemoRepository(window.localStorage).setXMockExecutionEnabled(
+          activeSession.userId,
+          selectedWorkspaceId,
+          enabled,
+        );
+      },
+      enabled
+        ? "Adaptador local do X reativado."
+        : "Adaptador local do X desativado; execuções simuladas estão bloqueadas.",
+    );
+  };
+
   const logout = (): void => {
     clearDemoSession(window.sessionStorage);
     router.push("/entrar");
@@ -363,6 +384,7 @@ export function WorkspaceDashboard() {
     selectedWorkspace.role === "OWNER" || selectedWorkspace.role === "ADMIN";
   const canChangeRoles = selectedWorkspace.role === "OWNER";
   const canChangePlan = selectedWorkspace.role === "OWNER";
+  const canConfigureIntegrations = selectedWorkspace.role === "OWNER";
   const canOperateTasks =
     selectedWorkspace.role === "OWNER" ||
     selectedWorkspace.role === "ADMIN" ||
@@ -813,6 +835,70 @@ export function WorkspaceDashboard() {
             </p>
           </section>
         ) : null}
+
+        <section className="integrationArea">
+          <div className="sectionHeading">
+            <div>
+              <p className="eyebrow">Marco 08 · Prontidão</p>
+              <h2>Integrações sob controle</h2>
+              <p>
+                Este painel separa o que é simulado do que continua pendente.
+                Nenhuma integração externa é ativada por esta tela.
+              </p>
+            </div>
+          </div>
+          <div className="integrationGrid">
+            {dashboard.integration.integrations.map((integration) => (
+              <article key={integration.name}>
+                <div>
+                  <strong>{integration.name}</strong>
+                  <span
+                    className={
+                      "integrationStatus integration" + integration.status
+                    }
+                  >
+                    {integration.status}
+                  </span>
+                </div>
+                <p>{integration.detail}</p>
+              </article>
+            ))}
+          </div>
+          {canConfigureIntegrations ? (
+            <div className="integrationControl">
+              <div>
+                <strong>Adaptador local do X</strong>
+                <p>
+                  {dashboard.integration.xMockExecutionEnabled
+                    ? "Ativo: tarefas continuam inteiramente no navegador."
+                    : "Desativado: novas execuções simuladas são bloqueadas."}
+                </p>
+              </div>
+              <button
+                className={
+                  dashboard.integration.xMockExecutionEnabled
+                    ? "secondaryButton"
+                    : "primaryButton"
+                }
+                disabled={isBusy}
+                onClick={() =>
+                  setXMockExecutionEnabled(
+                    !dashboard.integration.xMockExecutionEnabled,
+                  )
+                }
+                type="button"
+              >
+                {dashboard.integration.xMockExecutionEnabled
+                  ? "Desativar simulador"
+                  : "Reativar simulador"}
+              </button>
+            </div>
+          ) : (
+            <p className="readOnlyNotice">
+              Somente Owners podem alterar esta configuração de demonstração.
+            </p>
+          )}
+        </section>
 
         <section className="taskArea">
           <div className="sectionHeading">
